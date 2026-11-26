@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="كاشف الفقع">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0a'/%3E%3Ctext x='90' y='120' font-size='100' text-anchor='middle'%3E🍄%3C/text%3E%3C/svg%3E">
+<title>كاشف الفقع الذكي</title>
+<style>
+:root{--bg:#0a0a0a;--surface:#161616;--card:#1e1e1e;--gold:#D4A853;--brown:#8B6914;--green:#4CAF50;--amber:#FFC107;--red:#FF5252;--text:#e8e0d4;--dim:#8a8078;--radius:14px;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;user-select:none}
+header{padding:calc(var(--safe-top) + 8px) 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface);z-index:10}
+header h1{font-size:18px;color:var(--gold);display:flex;align-items:center;gap:6px}
+#gps-hdr{font-size:11px;color:var(--green);background:rgba(76,175,80,.12);padding:3px 8px;border-radius:12px;display:none}
+main{flex:1;overflow:hidden;position:relative}
+section{position:absolute;inset:0;overflow-y:auto;padding:0;opacity:0;pointer-events:none;transition:opacity .25s;-webkit-overflow-scrolling:touch}
+section.active{opacity:1;pointer-events:auto}
+nav{flex-shrink:0;display:flex;background:var(--surface);border-top:1px solid #222;padding:4px 0 calc(var(--safe-bot) + 4px)}
+nav button{flex:1;background:none;border:none;color:var(--dim);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;cursor:pointer;transition:color .2s}
+nav button.active{color:var(--gold)}
+nav button .ico{font-size:20px}
+
+/* LIVE CAMERA */
+#sec-detect{display:flex;flex-direction:column;height:100%}
+#cam-container{flex:1;position:relative;background:#000;overflow:hidden}
+#cam-container video{width:100%;height:100%;object-fit:cover}
+#cam-container canvas{display:none}
+#scan-overlay{position:absolute;inset:0;pointer-events:none;z-index:2}
+#scan-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;animation:none}
+@keyframes scanDown{0%{top:0;opacity:.8}100%{top:100%;opacity:0}}
+.scanning #scan-line{animation:scanDown 2s linear infinite;opacity:1}
+
+/* FLOATING RESULT PANEL */
+#live-panel{position:absolute;top:10px;left:10px;right:10px;z-index:5;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:14px;padding:12px;display:none;border:2px solid transparent;transition:border-color .3s}
+#live-panel.high{border-color:var(--green)}
+#live-panel.mid{border-color:var(--amber)}
+#live-panel.low{border-color:var(--red)}
+#live-panel .top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#live-conf{font-size:28px;font-weight:700}
+#live-label{font-size:13px;padding:3px 10px;border-radius:8px;font-weight:600}
+#live-bars{display:flex;gap:6px}
+.bar-item{flex:1;text-align:center}
+.bar-item .bar-label{font-size:9px;color:var(--dim);margin-bottom:3px}
+.bar-item .bar-track{height:4px;background:#333;border-radius:2px;overflow:hidden}
+.bar-item .bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.bar-item .bar-val{font-size:10px;color:var(--dim);margin-top:2px}
+
+/* ALERT TOAST */
+#alert-toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);z-index:8;background:var(--green);color:#000;font-weight:700;font-size:14px;padding:10px 20px;border-radius:30px;opacity:0;transition:all .4s;white-space:nowrap;pointer-events:none}
+#alert-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* BOTTOM CONTROLS */
+#cam-controls{position:absolute;bottom:0;left:0;right:0;z-index:5;padding:12px 16px 16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.ctrl-btn{width:48px;height:48px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.ctrl-btn:active{transform:scale(.9)}
+#btn-scan{width:68px;height:68px;border-radius:50%;border:4px solid var(--gold);background:rgba(212,168,83,.15);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+#btn-scan.active{background:rgba(212,168,83,.4);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(212,168,83,.4)}50%{box-shadow:0 0 0 12px rgba(212,168,83,0)}}
+#btn-scan .scan-icon{font-size:24px}
+#btn-capture{background:rgba(255,255,255,.2)}
+
+/* FALLBACK - no camera */
+#cam-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card);z-index:3}
+#cam-fallback .big{font-size:52px;margin-bottom:10px}
+#cam-fallback span{color:var(--dim);font-size:14px;text-align:center;padding:0 20px}
+#cam-fallback input{display:none}
+#cam-fallback .fb-btn{margin-top:16px;padding:12px 28px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--gold),var(--brown));color:#000;font-size:15px;font-weight:600;cursor:pointer}
+
+/* HISTORY */
+#sec-history{padding:12px 16px 16px}
+#history-list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.hist-item{background:var(--card);border-radius:var(--radius);padding:12px;display:flex;gap:12px;align-items:center}
+.hist-thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;background:#333;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-info .hi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.hist-info .hi-conf{font-weight:700;font-size:16px}
+.hist-info .hi-date{font-size:11px;color:var(--dim)}
+.hist-info .hi-loc{font-size:11px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty-state{text-align:center;padding:40px 20px;color:var(--dim)}
+.empty-state .big{font-size:48px;margin-bottom:8px}
+
+/* LOCATIONS */
+#sec-loc{padding:12px 16px 16px}
+.loc-card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s}
+.loc-card:active{background:#2a2a2a}
+.loc-icon{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--brown));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.loc-info{flex:1}
+.loc-info .li-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.loc-info .li-coord{font-size:11px;color:var(--dim)}
+
+/* TIPS */
+#sec-tips{padding:12px 16px 16px}
+.tip-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:10px}
+.tip-card h3{color:var(--gold);font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.tip-card p{font-size:13px;color:var(--dim);line-height:1.6}
+.section-title{font-size:16px;color:var(--gold);margin:8px 0 10px;font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍄 كاشف الفقع</h1>
+  <span id="gps-hdr">📍 GPS</span>
+</header>
+
+<main>
+  <!-- DETECTOR -->
+  <section id="sec-detect" class="active">
+    <div id="cam-container">
+      <video id="cam-video" autoplay playsinline muted></video>
+      <canvas id="cam-canvas"></canvas>
+
+      <div id="scan-overlay">
+        <div id="scan-line"></div>
+      </div>
+
+      <div id="live-panel">
+        <div class="top-row">
+          <span id="live-conf" style="color:var(--dim)">--%</span>
+          <span id="live-label" style="background:#333;color:var(--dim)">في الانتظار</span>
+        </div>
+        <div id="live-bars">
+          <div class="bar-item"><div class="bar-label">تشققات</div><div class="bar-track"><div class="bar-fill" id="bar-crack" style="width:0;background:var(--gold)"></div></div><div class="bar-val" id="val-crack">0%</div></div>
+          <div class="bar-item"><div class="bar-label">تربة</div><div class="bar-track"><div class="bar-fill" id="bar-soil" style="width:0;background:var(--amber)"></div></div><div class="bar-val" id="val-soil">0%</div></div>
+          <div class="bar-item"><div class="bar-label">رطوبة</div><div class="bar-track"><div class="bar-fill" id="bar-moist" style="width:0;background:#42A5F5"></div></div><div class="bar-val" id="val-moist">0%</div></div>
+          <div class="bar-item"><div class="bar-label">حواف</div><div class="bar-track"><div class="bar-fill" id="bar-edge" style="width:0;background:var(--green)"></div></div><div class="bar-val" id="val-edge">0%</div></div>
+        </div>
+      </div>
+
+      <div id="alert-toast">🍄 منطقة فقع محتملة!</div>
+
+      <div id="cam-fallback">
+        <div class="big">📸</div>
+        <span>الكاميرا غير متاحة هنا<br>اضغط لاختيار صورة</span>
+        <input type="file" id="file-input" accept="image/*" capture="environment">
+        <button class="fb-btn" onclick="document.getElementById('file-input').click()">📷 اختر صورة</button>
+      </div>
+
+      <div id="cam-controls">
+        <button class="ctrl-btn" id="btn-flash" title="فلاش">🔦</button>
+        <button id="btn-scan" title="بدء المسح"><span class="scan-icon">🔍</span></button>
+        <button class="ctrl-btn" id="btn-capture" title="حفظ">📸</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="sec-history">
+    <div class="section-title">📋 سجل الاكتشافات</div>
+    <div id="history-list"></div>
+  </section>
+
+  <!-- LOCATIONS -->
+  <section id="sec-loc">
+    <div class="section-title">📍 مواقع مناسبة</div>
+    <div id="loc-list">
+      <div class="loc-card" onclick="openMap(25.2048,45.6977)"><div class="loc-icon">🏜️</div><div class="loc-info"><div class="li-name">روضة خريم</div><div class="li-coord">25.2°N 45.7°E</div></div></div>
+      <div class="loc-card" onclick="openMap(28.3,41.7)"><div class="loc-icon">🌾</div><div class="loc-info"><div class="li-name">حائل - النفود</div><div class="li-coord">28.3°N 41.7°E</div></div></div>
+      <div class="loc-card" onclick="openMap(26.3,43.97)"><div class="loc-icon">🏜️</div><div class="loc-info"><div class="li-name">القصيم</div><div class="li-coord">26.3°N 44.0°E</div></div></div>
+      <div class="loc-card" onclick="openMap(29.97,40.21)"><div class="loc-icon">🌿</div><div class="loc-info"><div class="li-name">الجوف</div><div class="li-coord">30.0°N 40.2°E</div></div></div>
+      <div class="loc-card" onclick="openMap(31.33,37.37)"><div class="loc-icon">🏜️</div><div class="loc-info"><div class="li-name">تبوك</div><div class="li-coord">31.3°N 37.4°E</div></div></div>
+    </div>
+  </section>
+
+  <!-- TIPS -->
+  <section id="sec-tips">
+    <div class="section-title">💡 نصائح الخبراء</div>
+    <div class="tip-card"><h3>🌧️ أفضل وقت</h3><p>بعد أمطار الوسم (أكتوبر-نوفمبر) بـ 40-70 يوم. التربة تحتاج رطوبة كافية ثم جفاف نسبي.</p></div>
+    <div class="tip-card"><h3>🔍 علامات التربة</h3><p>ابحث عن تشققات دائرية صغيرة في التربة الرملية. الفقع يرفع التربة فوقه ويسبب شقوق مميزة.</p></div>
+    <div class="tip-card"><h3>🌱 النباتات الدالة</h3><p>الرقروق والأرطى والإرطى من النباتات المرتبطة بالفقع. وجودها يزيد احتمال وجود الفقع قربها.</p></div>
+    <div class="tip-card"><h3>⏰ توقيت البحث</h3><p>الصباح الباكر أفضل وقت — الندى يبرز التشققات والتربة تكون أوضح قبل حرارة الشمس.</p></div>
+    <div class="tip-card"><h3>📱 استخدام التطبيق</h3><p>وجّه الكاميرا للأرض واضغط زر المسح. التطبيق يحلل التشققات ولون التربة والرطوبة. كلما ارتفعت النسبة، زاد احتمال وجود الفقع.</p></div>
+    <div class="tip-card"><h3>⚠️ تنبيه</h3><p>التطبيق يحلل شكل التربة فقط ولا يضمن وجود الفقع. استخدمه كأداة مساعدة مع خبرتك الشخصية.</p></div>
+  </section>
+</main>
+
+<nav>
+  <button class="active" data-tab="sec-detect"><span class="ico">📷</span>كاشف</button>
+  <button data-tab="sec-history"><span class="ico">📋</span>السجل</button>
+  <button data-tab="sec-loc"><span class="ico">📍</span>مواقع</button>
+  <button data-tab="sec-tips"><span class="ico">💡</span>نصائح</button>
+</nav>
+
+<script>
+// --- STATE ---
+let scanning = false;
+let scanTimer = null;
+let stream = null;
+let cameraReady = false;
+let gpsLat = null, gpsLng = null;
+let flashOn = false;
+let history = JSON.parse(localStorage.getItem('truffle_hist')||'[]');
+
+const video = document.getElementById('cam-video');
+const canvas = document.getElementById('cam-canvas');
+const ctx = canvas.getContext('2d',{willReadFrequently:true});
+const livePanel = document.getElementById('live-panel');
+const scanOverlay = document.getElementById('scan-overlay');
+const btnScan = document.getElementById('btn-scan');
+const btnCapture = document.getElementById('btn-capture');
+const btnFlash = document.getElementById('btn-flash');
+const alertToast = document.getElementById('alert-toast');
+const fallback = document.getElementById('cam-fallback');
+const fileInput = document.getElementById('file-input');
+
+// --- TABS ---
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+    if(b.dataset.tab==='sec-history') renderHistory();
+  });
+});
+
+// --- GPS ---
+if(navigator.geolocation){
+  navigator.geolocation.watchPosition(p=>{
+    gpsLat=p.coords.latitude; gpsLng=p.coords.longitude;
+    const hdr=document.getElementById('gps-hdr');
+    hdr.style.display='inline';
+    hdr.textContent='📍 '+gpsLat.toFixed(4)+', '+gpsLng.toFixed(4);
+  },()=>{},{enableHighAccuracy:true,maximumAge:10000});
+}
+
+// --- CAMERA ---
+async function startCamera(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},
+      audio:false
+    });
+    video.srcObject = stream;
+    await video.play();
+    cameraReady = true;
+    fallback.style.display='none';
+    video.style.display='block';
+    livePanel.style.display='block';
+  } catch(e){
+    console.log('Camera not available:',e);
+    fallback.style.display='flex';
+    video.style.display='none';
+  }
+}
+
+// fallback: file input
+fileInput.addEventListener('change',e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const img = new Image();
+  img.onload = ()=>{
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img,0,0);
+    const result = analyzeFrame();
+    showResult(result);
+    livePanel.style.display='block';
+    // save thumbnail
+    const thumbCanvas = document.createElement('canvas');
+    thumbCanvas.width=120; thumbCanvas.height=90;
+    thumbCanvas.getContext('2d').drawImage(img,0,0,120,90);
+    result.thumb = thumbCanvas.toDataURL('image/jpeg',0.6);
+    result.time = Date.now();
+    result.lat = gpsLat;
+    result.lng = gpsLng;
+    history.unshift(result);
+    if(history.length>50) history.pop();
+    localStorage.setItem('truffle_hist',JSON.stringify(history));
+  };
+  img.src = URL.createObjectURL(file);
+});
+
+// --- FLASH ---
+btnFlash.addEventListener('click',async()=>{
+  if(!stream) return;
+  const track = stream.getVideoTracks()[0];
+  const caps = track.getCapabilities?.();
+  if(caps?.torch){
+    flashOn = !flashOn;
+    await track.applyConstraints({advanced:[{torch:flashOn}]});
+    btnFlash.style.background = flashOn ? 'rgba(212,168,83,.4)' : 'rgba(255,255,255,.12)';
+  }
+});
+
+// --- SCAN TOGGLE ---
+btnScan.addEventListener('click',()=>{
+  if(scanning) stopScan(); else startScan();
+});
+
+function startScan(){
+  if(!cameraReady) return;
+  scanning = true;
+  btnScan.classList.add('active');
+  btnScan.querySelector('.scan-icon').textContent='⏸️';
+  scanOverlay.classList.add('scanning');
+  livePanel.style.display='block';
+  doScan();
+  scanTimer = setInterval(doScan, 1800);
+}
+
+function stopScan(){
+  scanning = false;
+  btnScan.classList.remove('active');
+  btnScan.querySelector('.scan-icon').textContent='🔍';
+  scanOverlay.classList.remove('scanning');
+  clearInterval(scanTimer);
+}
+
+function doScan(){
+  if(!cameraReady || !scanning) return;
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  ctx.drawImage(video,0,0);
+  const result = analyzeFrame();
+  showResult(result);
+}
+
+// --- CAPTURE ---
+btnCapture.addEventListener('click',()=>{
+  if(!cameraReady) return;
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  ctx.drawImage(video,0,0);
+  const result = analyzeFrame();
+  showResult(result);
+  // thumbnail
+  const tc = document.createElement('canvas');
+  tc.width=120; tc.height=90;
+  tc.getContext('2d').drawImage(video,0,0,120,90);
+  result.thumb = tc.toDataURL('image/jpeg',0.6);
+  result.time = Date.now();
+  result.lat = gpsLat;
+  result.lng = gpsLng;
+  history.unshift(result);
+  if(history.length>50) history.pop();
+  localStorage.setItem('truffle_hist',JSON.stringify(history));
+  // vibrate
+  navigator.vibrate?.([100,50,100]);
+  showToast('📸 تم الحفظ في السجل');
+});
+
+// --- ANALYSIS ENGINE ---
+function analyzeFrame(){
+  const w=canvas.width, h=canvas.height;
+  const imgData = ctx.getImageData(0,0,w,h);
+  const d = imgData.data;
+  const gray = new Float32Array(w*h);
+  for(let i=0;i<w*h;i++){
+    const j=i*4;
+    gray[i]=0.299*d[j]+0.587*d[j+1]+0.114*d[j+2];
+  }
+  // Sobel
+  const mag = new Float32Array(w*h);
+  let maxMag=0;
+  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
+    const idx=y*w+x;
+    const gx=(-gray[(y-1)*w+x-1]+gray[(y-1)*w+x+1]
+              -2*gray[y*w+x-1]+2*gray[y*w+x+1]
+              -gray[(y+1)*w+x-1]+gray[(y+1)*w+x+1]);
+    const gy=(-gray[(y-1)*w+x-1]-2*gray[(y-1)*w+x]  -gray[(y-1)*w+x+1]
+              +gray[(y+1)*w+x-1]+2*gray[(y+1)*w+x]+gray[(y+1)*w+x+1]);
+    mag[idx]=Math.sqrt(gx*gx+gy*gy);
+    if(mag[idx]>maxMag) maxMag=mag[idx];
+  }
+  // edge percentage
+  const edgeThresh = maxMag*0.25;
+  let edgeCount=0;
+  for(let i=0;i<w*h;i++) if(mag[i]>edgeThresh) edgeCount++;
+  const edgePct = Math.min(edgeCount/(w*h)*5, 1);
+
+  // crack pattern + REGULARITY CHECK (anti-textile)
+  const gridN=8;
+  const cellW=Math.floor(w/gridN), cellH=Math.floor(h/gridN);
+  let crackCells=0, totalCells=gridN*gridN;
+  const cellRatios=[];
+  for(let gy=0;gy<gridN;gy++) for(let gx=0;gx<gridN;gx++){
+    let cellEdge=0, cellTotal=cellW*cellH;
+    for(let cy=0;cy<cellH;cy++) for(let cx=0;cx<cellW;cx++){
+      const px=(gy*cellH+cy)*w+(gx*cellW+cx);
+      if(mag[px]>edgeThresh) cellEdge++;
+    }
+    const ratio=cellEdge/cellTotal;
+    cellRatios.push(ratio);
+    if(ratio>0.03 && ratio<0.35) crackCells++;
+  }
+  // pattern regularity: low variance = uniform pattern = textile/carpet
+  const ratioMean=cellRatios.reduce((a,b)=>a+b,0)/cellRatios.length;
+  const ratioVar=cellRatios.reduce((a,b)=>a+(b-ratioMean)*(b-ratioMean),0)/cellRatios.length;
+  let regPenalty=1.0;
+  if(ratioVar<0.002)regPenalty=0.12;
+  else if(ratioVar<0.004)regPenalty=0.35;
+  else if(ratioVar<0.006)regPenalty=0.6;
+  // too many crack cells (>80%) = unnatural
+  if(crackCells/totalCells>0.8)regPenalty*=0.4;
+  const crackScore=Math.min(crackCells/totalCells*2.5,1)*regPenalty;
+
+  // soil color + NON-EARTH COLOR FILTER
+  let soilPixels=0, totalPixels=0, nonEarthPx=0;
+  const step=3;
+  for(let y=0;y<h;y+=step) for(let x=0;x<w;x+=step){
+    const j=(y*w+x)*4;
+    const r=d[j],g=d[j+1],b=d[j+2];
+    totalPixels++;
+    if(r>120&&r<230 && g>90&&g<200 && b>50&&b<160 && r>g && g>b && (r-b)>20) soilPixels++;
+    // detect non-earth colors: saturated reds/blues/purples/greens (textiles, carpets)
+    const maxC=Math.max(r,g,b),minC=Math.min(r,g,b);
+    const sat=maxC>0?(maxC-minC)/maxC:0;
+    if(sat>0.4){
+      if(b>r||(r>150&&g<r*0.45)||(g>r&&g>b&&sat>0.5))nonEarthPx++;
+    }
+  }
+  const rawSoilScore=Math.min(soilPixels/totalPixels*2,1);
+  const nonEarthRatio=nonEarthPx/totalPixels;
+  let soilPenalty=1.0;
+  if(nonEarthRatio>0.15)soilPenalty=0.15;
+  else if(nonEarthRatio>0.08)soilPenalty=0.4;
+  else if(nonEarthRatio>0.04)soilPenalty=0.65;
+  const soilScore=rawSoilScore*soilPenalty;
+
+  // moisture
+  let brightVals=[];
+  for(let y=0;y<h;y+=step) for(let x=0;x<w;x+=step){
+    brightVals.push(gray[y*w+x]);
+  }
+  const mean = brightVals.reduce((a,b)=>a+b,0)/brightVals.length;
+  const variance = brightVals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/brightVals.length;
+  const stdDev = Math.sqrt(variance);
+  const moistScore = Math.min(Math.max((stdDev-15)/45,0),1);
+
+  const confidence = Math.round((crackScore*0.40 + soilScore*0.25 + moistScore*0.20 + edgePct*0.15)*100);
+
+  return {confidence, crack:Math.round(crackScore*100), soil:Math.round(soilScore*100), moist:Math.round(moistScore*100), edge:Math.round(edgePct*100)};
+}
+
+// --- SHOW RESULT ---
+let lastAlertTime = 0;
+function showResult(r){
+  const confEl = document.getElementById('live-conf');
+  const labelEl = document.getElementById('live-label');
+  confEl.textContent = r.confidence+'%';
+
+  let cls,label;
+  if(r.confidence >= 60){
+    cls='high'; label='🍄 منطقة محتملة!';
+    confEl.style.color='var(--green)';
+    labelEl.style.background='rgba(76,175,80,.2)';
+    labelEl.style.color='var(--green)';
+    // alert every 10 seconds max
+    if(Date.now()-lastAlertTime > 10000){
+      lastAlertTime = Date.now();
+      navigator.vibrate?.([200,100,200,100,300]);
+      showToast('🍄 منطقة فقع محتملة! '+r.confidence+'%');
+    }
+  } else if(r.confidence >= 35){
+    cls='mid'; label='⚠️ تحتاج تدقيق';
+    confEl.style.color='var(--amber)';
+    labelEl.style.background='rgba(255,193,7,.15)';
+    labelEl.style.color='var(--amber)';
+  } else {
+    cls='low'; label='❌ غير مناسبة';
+    confEl.style.color='var(--red)';
+    labelEl.style.background='rgba(255,82,82,.15)';
+    labelEl.style.color='var(--red)';
+  }
+  labelEl.textContent = label;
+  livePanel.className = cls;
+
+  // bars
+  document.getElementById('bar-crack').style.width = r.crack+'%';
+  document.getElementById('val-crack').textContent = r.crack+'%';
+  document.getElementById('bar-soil').style.width = r.soil+'%';
+  document.getElementById('val-soil').textContent = r.soil+'%';
+  document.getElementById('bar-moist').style.width = r.moist+'%';
+  document.getElementById('val-moist').textContent = r.moist+'%';
+  document.getElementById('bar-edge').style.width = r.edge+'%';
+  document.getElementById('val-edge').textContent = r.edge+'%';
+}
+
+function showToast(msg){
+  alertToast.textContent = msg;
+  alertToast.classList.add('show');
+  setTimeout(()=>alertToast.classList.remove('show'), 3000);
+}
+
+// --- HISTORY ---
+function renderHistory(){
+  const list = document.getElementById('history-list');
+  if(history.length===0){
+    list.innerHTML='<div class="empty-state"><div class="big">📋</div><div>لا يوجد سجل بعد<br>ابدأ المسح واحفظ النتائج</div></div>';
+    return;
+  }
+  list.innerHTML = history.map((h,i)=>{
+    const date = new Date(h.time);
+    const dateStr = date.toLocaleDateString('ar-SA')+ ' ' +date.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+    const color = h.confidence>=60?'var(--green)':h.confidence>=35?'var(--amber)':'var(--red)';
+    const loc = h.lat ? h.lat.toFixed(4)+', '+h.lng.toFixed(4) : 'بدون موقع';
+    return `<div class="hist-item">
+      ${h.thumb?`<img class="hist-thumb" src="${h.thumb}">`:'<div class="hist-thumb" style="display:flex;align-items:center;justify-content:center;font-size:24px">🍄</div>'}
+      <div class="hist-info">
+        <div class="hi-top"><span class="hi-conf" style="color:${color}">${h.confidence}%</span><span class="hi-date">${dateStr}</span></div>
+        <div class="hi-loc">📍 ${loc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- MAP ---
+function openMap(lat,lng){
+  window.open('https://maps.apple.com/?ll='+lat+','+lng+'&q=فقع&z=12','_blank');
+}
+
+// --- SERVICE WORKER (offline) ---
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  const swCode=`self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{e.respondWith(caches.open('truffle-v2').then(c=>c.match(e.request).then(r=>{const f=fetch(e.request).then(res=>{if(res.ok)c.put(e.request,res.clone());return res}).catch(()=>r);return r||f})))});`;
+  const b=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(b)).catch(()=>{
+    // fallback: cache page in CacheStorage directly
+    caches.open('truffle-v2').then(c=>c.add(location.href)).catch(()=>{});
+  });
+}
+
+// --- INIT ---
+startCamera();
+</script>
+</body>
+</html>
