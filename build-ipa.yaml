@@ -1,0 +1,59 @@
+name: Build Truffle IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Capacitor project
+        run: |
+          mkdir -p www
+          cp index.html www/
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/ios
+          npx cap init TruffleDetector com.alpha.truffle --web-dir www
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Configure iOS permissions
+        run: |
+          PLIST="ios/App/App/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'يحتاج التطبيق الكاميرا لتحليل التربة واكتشاف الفقع'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'يحتاج التطبيق الكاميرا لتحليل التربة واكتشاف الفقع'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'يحتاج التطبيق موقعك لتحديد مواقع الفقع على الخريطة'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSLocationWhenInUseUsageDescription 'يحتاج التطبيق موقعك لتحديد مواقع الفقع على الخريطة'" "$PLIST"
+
+      - name: Build iOS app
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO \
+            -derivedDataPath build
+
+      - name: Package IPA
+        run: |
+          APP_PATH=$(find ios/App/build -name "*.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: .app bundle not found"
+            exit 1
+          fi
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r TruffleDetector.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TruffleDetector-IPA
+          path: TruffleDetector.ipa
+          retention-days: 90
