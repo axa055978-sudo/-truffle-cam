@@ -6,30 +6,43 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Setup Capacitor project
+      - name: Prepare web content
         run: |
           mkdir -p www
           cp index.html www/
+
+      - name: Init npm and install Capacitor
+        run: |
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/ios
-          npx cap init TruffleDetector com.alpha.truffle --web-dir www
-          npx cap add ios
-          npx cap sync ios
+
+      - name: Init Capacitor
+        run: npx cap init TruffleDetector com.alpha.truffle --web-dir www
+
+      - name: Update CocoaPods
+        run: |
+          sudo gem install cocoapods
+          pod --version
+
+      - name: Add iOS platform
+        run: npx cap add ios
+
+      - name: Sync iOS
+        run: npx cap sync ios
 
       - name: Configure iOS permissions
         run: |
           PLIST="ios/App/App/Info.plist"
-          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'يحتاج التطبيق الكاميرا لتحليل التربة واكتشاف الفقع'" "$PLIST" 2>/dev/null || \
-          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'يحتاج التطبيق الكاميرا لتحليل التربة واكتشاف الفقع'" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'يحتاج التطبيق موقعك لتحديد مواقع الفقع على الخريطة'" "$PLIST" 2>/dev/null || \
-          /usr/libexec/PlistBuddy -c "Set :NSLocationWhenInUseUsageDescription 'يحتاج التطبيق موقعك لتحديد مواقع الفقع على الخريطة'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Camera needed to analyze soil'" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'Location needed for truffle mapping'" "$PLIST" 2>/dev/null || true
 
       - name: Build iOS app
         run: |
@@ -38,14 +51,18 @@ jobs:
             -scheme App \
             -sdk iphoneos \
             -configuration Release \
+            -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
-            -derivedDataPath build
+            CODE_SIGN_IDENTITY="" \
+            ONLY_ACTIVE_ARCH=NO \
+            -derivedDataPath build \
+            | tail -20
 
       - name: Package IPA
         run: |
           APP_PATH=$(find ios/App/build -name "*.app" -type d | head -1)
           if [ -z "$APP_PATH" ]; then
-            echo "Error: .app bundle not found"
+            echo "Error: .app not found"
             exit 1
           fi
           mkdir -p Payload
@@ -57,6 +74,3 @@ jobs:
           name: TruffleDetector-IPA
           path: TruffleDetector.ipa
           retention-days: 90
-
-          
-          
