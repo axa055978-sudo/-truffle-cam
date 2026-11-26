@@ -156,6 +156,9 @@ nav button .ni svg{width:100%;height:100%}
 #map-view.show{display:block}
 #leaflet-map{width:100%;height:100%;z-index:1}
 #leaflet-map .leaflet-control-attribution{display:none}
+#leaflet-map.desert-theme .leaflet-tile-pane{filter:sepia(0.22) saturate(0.78) brightness(1.06) hue-rotate(-8deg);transition:filter .4s}
+#leaflet-map.desert-theme .leaflet-popup-content-wrapper{background:#2A2318!important;border-color:#4A3D2E!important}
+#leaflet-map.desert-theme .leaflet-popup-tip{background:#2A2318!important;border-color:#4A3D2E!important}
 #leaflet-map .leaflet-control-zoom{border:none!important}
 #leaflet-map .leaflet-control-zoom a{background:var(--card2)!important;color:var(--gold)!important;border:1px solid var(--dim3)!important;width:28px!important;height:28px!important;line-height:28px!important;font-size:14px!important;border-radius:8px!important}
 #leaflet-map .leaflet-control-zoom a:first-child{margin-bottom:3px!important;border-radius:8px!important}
@@ -174,6 +177,12 @@ nav button .ni svg{width:100%;height:100%}
 .map-label-wadi{color:#8FC4E8}
 .map-label-shaaban{color:#7FD8CA}
 .map-label-well{color:#E8C87A}
+#leaflet-map.desert-theme .map-label{text-shadow:0 0 4px rgba(80,60,30,.95),0 0 8px rgba(60,45,20,.7),1px 1px 3px rgba(40,30,10,.9)}
+#leaflet-map.desert-theme .map-label-truffle{color:#BA7007}
+#leaflet-map.desert-theme .map-label-faydah{color:#2D8A1F}
+#leaflet-map.desert-theme .map-label-wadi{color:#2060C0}
+#leaflet-map.desert-theme .map-label-shaaban{color:#1A7A6A}
+#leaflet-map.desert-theme .map-label-well{color:#8A5D10}
 .leaflet-popup-content-wrapper{background:var(--card)!important;color:var(--text)!important;border-radius:10px!important;border:1px solid var(--dim3)!important;box-shadow:0 4px 16px rgba(0,0,0,.5)!important}
 .leaflet-popup-tip{background:var(--card)!important;border:1px solid var(--dim3)!important}
 .leaflet-popup-close-button{color:var(--dim)!important;font-size:16px!important}
@@ -938,7 +947,45 @@ var LOCS=[
   {name:'قلبان الحفيرة',region:'الرياض',lat:24.30,lng:45.60,cat:'well',desc:'جنوب الرياض'},
   {name:'قليب الشبيكية',region:'القصيم',lat:26.90,lng:44.10,cat:'well',desc:'شمال القصيم'},
   {name:'قلبان التيس',region:'حائل',lat:27.20,lng:41.80,cat:'well',desc:'جنوب حائل'},
-  {name:'قليب الجفر',region:'المنطقة الشرقية',lat:28.90,lng:47.20,cat:'well',desc:'شمال الشرقية'}
+  {name:'قليب الجفر',region:'المنطقة الشرقية',lat:28.90,lng:47.20,cat:'well',desc:'شمال الشرقية'},
+
+  // ===== مواقع إضافية — أودية (10) =====
+  {name:'وادي حنيفة',region:'الرياض',lat:24.58,lng:46.71,cat:'wadi',desc:'120 كم يخترق الرياض'},
+  {name:'وادي لبن',region:'الرياض',lat:24.60,lng:46.58,cat:'wadi',desc:'رافد وادي حنيفة الغربي'},
+  {name:'وادي نمار',region:'الرياض',lat:24.57,lng:46.62,cat:'wadi',desc:'متنزه وسد نمار'},
+  {name:'وادي السرحان',region:'الجوف',lat:30.00,lng:38.50,cat:'wadi',desc:'وادي كبير شمال المملكة'},
+  {name:'وادي الباطن',region:'الحدود الشمالية',lat:29.00,lng:46.00,cat:'wadi',desc:'امتداد وادي الرمة'},
+  {name:'وادي الدواسر',region:'الرياض',lat:20.49,lng:44.73,cat:'wadi',desc:'جنوب نجد'},
+  {name:'وادي تثليث',region:'عسير',lat:19.50,lng:44.20,cat:'wadi',desc:'جنوب المملكة'},
+  {name:'وادي بيشة',region:'عسير',lat:20.00,lng:42.70,cat:'wadi',desc:'وادي كبير في عسير'},
+  {name:'وادي تربة',region:'مكة',lat:21.20,lng:41.63,cat:'wadi',desc:'شرق الطائف'},
+  {name:'وادي فاطمة',region:'مكة',lat:21.95,lng:39.80,cat:'wadi',desc:'شمال شرق جدة'},
+
+  // ===== مواقع إضافية — شعبان (8) =====
+  {name:'شعيب لحا',region:'الرياض',lat:24.65,lng:46.63,cat:'shaaban',desc:'رافد وادي حنيفة'},
+  {name:'شعيب جو',region:'حائل',lat:27.50,lng:41.65,cat:'shaaban',desc:'شعيب مشهور في حائل'},
+  {name:'شعيب المسعودية',region:'الشرقية',lat:25.10,lng:47.25,cat:'shaaban',desc:'شرق الرياض'},
+  {name:'شعيب الودي',region:'الرياض',lat:26.06,lng:46.47,cat:'shaaban',desc:'شمال الرياض'},
+  {name:'شعيب أبالجد',region:'الرياض',lat:24.55,lng:46.55,cat:'shaaban',desc:'السويدي بالرياض'},
+  {name:'شعيب صفار',region:'الرياض',lat:24.75,lng:46.50,cat:'shaaban',desc:'رافد وادي حنيفة'},
+  {name:'شعيب وبير',region:'الرياض',lat:24.70,lng:46.55,cat:'shaaban',desc:'غرب الرياض'},
+  {name:'شعيب الأيسن',region:'الرياض',lat:24.62,lng:46.75,cat:'shaaban',desc:'شرق وادي حنيفة'},
+
+  // ===== مواقع إضافية — فياض وروضات (8) =====
+  {name:'روضة خريم',region:'الرياض',lat:25.40,lng:47.30,cat:'faydah',desc:'محمية ملكية مشهورة'},
+  {name:'روضة التنهاة',region:'القصيم',lat:26.50,lng:44.00,cat:'faydah',desc:'روضة كبيرة في القصيم'},
+  {name:'فيضة صلفيق',region:'حائل',lat:29.96,lng:42.72,cat:'faydah',desc:'شمال حائل'},
+  {name:'روضة الحسو',region:'الرياض',lat:24.80,lng:47.10,cat:'faydah',desc:'شرق الرياض'},
+  {name:'فيضة أم غار',region:'حائل',lat:29.66,lng:43.11,cat:'faydah',desc:'منطقة حائل'},
+  {name:'روضة نوره',region:'الرياض',lat:24.95,lng:46.85,cat:'faydah',desc:'شمال الرياض'},
+  {name:'روضة العتك',region:'القصيم',lat:26.20,lng:43.80,cat:'faydah',desc:'جنوب القصيم'},
+  {name:'فيضة العشر',region:'حائل',lat:28.80,lng:42.50,cat:'faydah',desc:'شمال غرب حائل'},
+
+  // ===== مواقع إضافية — آبار (4) =====
+  {name:'بئر هداج',region:'حائل',lat:27.52,lng:41.69,cat:'well',desc:'بئر تاريخي مشهور بحائل'},
+  {name:'عيون الأحساء',region:'الشرقية',lat:25.38,lng:49.60,cat:'well',desc:'ينابيع الأحساء الشهيرة'},
+  {name:'بئر الحلوة',region:'الرياض',lat:24.90,lng:46.10,cat:'well',desc:'بئر قديم قرب الرياض'},
+  {name:'قلبان الوسيعة',region:'القصيم',lat:26.60,lng:43.50,cat:'well',desc:'منطقة القصيم'}
 ];
 
 var activeCat='all';
@@ -1036,13 +1083,14 @@ var navLine=null;
 var currentTileLayer=null;
 var tileIdx=0;
 var TILES=[
-  {name:'تضاريس',url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attr:'OpenTopoMap'},
-  {name:'خريطة طبو',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',attr:'Esri Topo'},
+  {name:'صحراوية',url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attr:'OpenTopoMap',desert:true},
+  {name:'تضاريس',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',attr:'Esri Topo'},
   {name:'قمر صناعي',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Esri'},
   {name:'عادية',url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'OSM'},
   {name:'داكنة',url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',attr:'CartoDB'}
 ];
 var catColors={truffle:'#D4A54A',wadi:'#5B9BD5',faydah:'#62A842',shaaban:'#4DB8A8',well:'#D4A853'};
+var catColorsDesert={truffle:'#BA7007',wadi:'#2060C0',faydah:'#2D8A1F',shaaban:'#1A7A6A',well:'#8A5D10'};
 
 function initLeafletMap(){
   if(leafletMap) return;
@@ -1052,6 +1100,7 @@ function initLeafletMap(){
       maxBounds:[[14,32],[34,58]],minZoom:5,maxZoom:17
     });
     currentTileLayer=L.tileLayer(TILES[0].url,{subdomains:'abcd',maxZoom:18}).addTo(leafletMap);
+    if(TILES[0].desert) document.getElementById('leaflet-map').classList.add('desert-theme');
     addMapMarkers();
     setTimeout(function(){leafletMap.invalidateSize();},200);
   }catch(e){
@@ -1066,14 +1115,15 @@ function addMapMarkers(){
   for(i=0;i<mapLabels.length;i++) leafletMap.removeLayer(mapLabels[i]);
   mapMarkers=[];mapLabels=[];
   var catSymbol={truffle:'◆',wadi:'~',faydah:'●',shaaban:'≋',well:'◉'};
+  var isDesert=document.getElementById('leaflet-map').classList.contains('desert-theme');
   for(i=0;i<LOCS.length;i++){
     if(activeCat!=='all'&&LOCS[i].cat!==activeCat) continue;
     var loc=LOCS[i];
-    var col=catColors[loc.cat]||'#888';
+    var col=isDesert?(catColorsDesert[loc.cat]||'#5C4020'):(catColors[loc.cat]||'#888');
     var isNav=navTarget&&navTarget.name===loc.name;
     var r=isNav?8:6;
     var marker=L.circleMarker([loc.lat,loc.lng],{
-      radius:r,fillColor:col,color:'#000',weight:1.5,fillOpacity:.9
+      radius:r,fillColor:col,color:isDesert?'#3A2A15':'#000',weight:isDesert?2:1.5,fillOpacity:.9
     }).addTo(leafletMap);
     marker.bindPopup('<div style="direction:rtl;font-family:-apple-system,sans-serif;min-width:130px"><b style="color:'+col+';font-size:14px">'+loc.name+'</b><br><span style="font-size:11px;color:#888">'+loc.region+'</span><br><span style="font-size:10px;color:#aaa">'+loc.desc+'</span><button class="popup-nav-btn" onclick="startNavFromMap(\''+loc.name.replace(/'/g,"\\'")+'\')">ملاحة</button></div>');
     marker.locData=loc;
@@ -1116,6 +1166,9 @@ document.getElementById('map-layer-btn').addEventListener('click',function(){
   tileIdx=(tileIdx+1)%TILES.length;
   if(currentTileLayer&&leafletMap) leafletMap.removeLayer(currentTileLayer);
   currentTileLayer=L.tileLayer(TILES[tileIdx].url,{subdomains:'abcd',maxZoom:18}).addTo(leafletMap);
+  var mapEl=document.getElementById('leaflet-map');
+  if(TILES[tileIdx].desert){mapEl.classList.add('desert-theme');}else{mapEl.classList.remove('desert-theme');}
+  addMapMarkers();
   this.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'+TILES[tileIdx].name;
 });
 
