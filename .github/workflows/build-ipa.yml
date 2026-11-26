@@ -15,11 +15,11 @@ jobs:
 
       - name: Create app source files
         run: |
-          mkdir -p Sources Resources
+          mkdir -p Sources WebContent Config
 
-          cp index.html Resources/
+          cp index.html WebContent/
 
-          cat > Sources/AppDelegate.swift << 'EOF'
+          cat > Sources/AppDelegate.swift << 'SWIFT'
           import UIKit
 
           @main
@@ -34,31 +34,44 @@ jobs:
                   return true
               }
           }
-          EOF
+          SWIFT
 
-          cat > Sources/ViewController.swift << 'EOF'
+          cat > Sources/ViewController.swift << 'SWIFT'
           import UIKit
           import WebKit
 
-          class ViewController: UIViewController {
+          class ViewController: UIViewController, WKNavigationDelegate {
+              var webView: WKWebView!
+
               override func viewDidLoad() {
                   super.viewDidLoad()
+                  view.backgroundColor = .black
+
                   let config = WKWebViewConfiguration()
                   config.allowsInlineMediaPlayback = true
                   config.mediaTypesRequiringUserActionForPlayback = []
-                  let wv = WKWebView(frame: view.bounds, configuration: config)
-                  wv.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-                  view.addSubview(wv)
-                  if let u = Bundle.main.url(forResource: "index", withExtension: "html") {
-                      wv.loadFileURL(u, allowingReadAccessTo: u.deletingLastPathComponent())
+
+                  webView = WKWebView(frame: view.bounds, configuration: config)
+                  webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                  webView.navigationDelegate = self
+                  webView.isOpaque = false
+                  webView.backgroundColor = .black
+                  webView.scrollView.backgroundColor = .black
+                  view.addSubview(webView)
+
+                  if let url = Bundle.main.url(forResource: "index", withExtension: "html") {
+                      webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+                  } else {
+                      let fallback = "<html><body style='background:#000;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:system-ui'><h1>index.html not found in bundle</h1></body></html>"
+                      webView.loadHTMLString(fallback, baseURL: nil)
                   }
               }
 
               override var prefersStatusBarHidden: Bool { true }
           }
-          EOF
+          SWIFT
 
-          cat > Resources/Info.plist << 'EOF'
+          cat > Config/Info.plist << 'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
             "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -67,7 +80,7 @@ jobs:
             <key>CFBundleName</key>
             <string>TruffleDetector</string>
             <key>CFBundleDisplayName</key>
-            <string>TruffleDetector</string>
+            <string>كاشف الفقع</string>
             <key>CFBundleIdentifier</key>
             <string>com.alpha.truffle</string>
             <key>CFBundleVersion</key>
@@ -92,11 +105,11 @@ jobs:
             <string>Location needed to map truffle spots</string>
           </dict>
           </plist>
-          EOF
+          PLIST
 
       - name: Create Xcode project spec
         run: |
-          cat > project.yml << 'EOF'
+          cat > project.yml << 'YAML'
           name: TruffleDetector
           options:
             deploymentTarget:
@@ -108,14 +121,14 @@ jobs:
               sources:
                 - path: Sources
               resources:
-                - path: Resources
+                - path: WebContent
               settings:
                 base:
-                  INFOPLIST_FILE: Resources/Info.plist
+                  INFOPLIST_FILE: Config/Info.plist
                   CODE_SIGNING_ALLOWED: "NO"
                   CODE_SIGN_IDENTITY: ""
                   PRODUCT_BUNDLE_IDENTIFIER: com.alpha.truffle
-          EOF
+          YAML
 
       - name: Generate Xcode project
         run: xcodegen generate
@@ -131,6 +144,19 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             ONLY_ACTIVE_ARCH=NO \
             -derivedDataPath build
+
+      - name: Verify bundle contents
+        run: |
+          APP=$(find build -name "*.app" -type d | head -1)
+          echo "=== App bundle contents ==="
+          ls -la "$APP/"
+          echo "=== Checking for index.html ==="
+          find "$APP" -name "index.html" -type f
+          if [ ! -f "$APP/index.html" ]; then
+            echo "ERROR: index.html not found in app bundle!"
+            exit 1
+          fi
+          echo "index.html found OK"
 
       - name: Package IPA
         run: |
