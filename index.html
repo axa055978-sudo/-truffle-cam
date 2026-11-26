@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="كاشف الفقع">
 <meta name="theme-color" content="#0D0B09">
 <title>كاشف الفقع الذكي</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{
   --bg:#0D0B09;--surface:#161310;--card:#1E1A14;--card2:#262118;--card3:#2E281F;
@@ -150,14 +152,26 @@ nav button .ni svg{width:100%;height:100%}
 .cf-btn.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border-color:var(--gold);box-shadow:0 2px 8px rgba(212,165,74,.25)}
 
 /* Map View */
-#map-view{position:relative;width:100%;aspect-ratio:1/1;max-height:280px;background:var(--card);border-bottom:1px solid var(--dim3);flex-shrink:0;overflow:hidden;display:none}
+#map-view{position:relative;width:100%;height:55vh;background:var(--card);border-bottom:1px solid var(--dim3);flex-shrink:0;overflow:hidden;display:none}
 #map-view.show{display:block}
-#map-svg{width:100%;height:100%}
-.map-toggle{position:absolute;top:8px;right:8px;background:var(--card2);border:1px solid var(--dim3);color:var(--dim);padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;z-index:2}
+#leaflet-map{width:100%;height:100%;z-index:1}
+#leaflet-map .leaflet-control-attribution{display:none}
+#leaflet-map .leaflet-control-zoom{border:none!important}
+#leaflet-map .leaflet-control-zoom a{background:var(--card2)!important;color:var(--gold)!important;border:1px solid var(--dim3)!important;width:28px!important;height:28px!important;line-height:28px!important;font-size:14px!important;border-radius:8px!important}
+#leaflet-map .leaflet-control-zoom a:first-child{margin-bottom:3px!important;border-radius:8px!important}
+.map-toggle{position:absolute;top:8px;right:8px;background:var(--card2);border:1px solid var(--dim3);color:var(--dim);padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;z-index:1000}
 .map-toggle.on{background:var(--gold);color:#000;border-color:var(--gold)}
-.map-legend{position:absolute;bottom:8px;left:8px;display:flex;gap:8px;z-index:2;flex-wrap:wrap}
+.map-layer-btn{position:absolute;top:8px;left:8px;background:var(--card2);border:1px solid var(--dim3);color:var(--dim);padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;z-index:1000;display:flex;align-items:center;gap:4px}
+.map-layer-btn svg{width:12px;height:12px}
+.map-legend{position:absolute;bottom:8px;left:8px;display:flex;gap:8px;z-index:1000;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:3px;font-size:8px;color:var(--dim);font-weight:600}
 .legend-dot{width:6px;height:6px;border-radius:50%}
+.loc-pulse{border-radius:50%;animation:locPulse 2s infinite}
+@keyframes locPulse{0%{box-shadow:0 0 0 0 rgba(91,155,213,.6)}70%{box-shadow:0 0 0 12px rgba(91,155,213,0)}100%{box-shadow:0 0 0 0 rgba(91,155,213,0)}}
+.leaflet-popup-content-wrapper{background:var(--card)!important;color:var(--text)!important;border-radius:10px!important;border:1px solid var(--dim3)!important;box-shadow:0 4px 16px rgba(0,0,0,.5)!important}
+.leaflet-popup-tip{background:var(--card)!important;border:1px solid var(--dim3)!important}
+.leaflet-popup-close-button{color:var(--dim)!important;font-size:16px!important}
+.popup-nav-btn{display:block;margin-top:6px;padding:4px 10px;background:var(--gold);color:#000;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;width:100%;text-align:center}
 
 /* Stats row */
 .stat-row{display:flex;gap:8px;margin-bottom:8px}
@@ -300,7 +314,8 @@ nav button .ni svg{width:100%;height:100%}
 
     <div id="map-view" class="show">
       <button class="map-toggle on" id="map-toggle">الخريطة</button>
-      <svg id="map-svg" viewBox="0 0 400 400"></svg>
+      <button class="map-layer-btn" id="map-layer-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>طبقة</button>
+      <div id="leaflet-map"></div>
       <div class="map-legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>فقع</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>فياض</div>
@@ -943,13 +958,18 @@ document.getElementById('map-toggle').addEventListener('click',function(){
   mapVisible=!mapVisible;
   var mv=document.getElementById('map-view');
   var tb=document.getElementById('map-toggle');
-  if(mapVisible){mv.classList.add('show');tb.classList.add('on');updateMapSVG();}
-  else{mv.classList.remove('show');tb.classList.remove('on');}
+  if(mapVisible){
+    mv.classList.add('show');tb.classList.add('on');
+    if(!leafletMap) setTimeout(initLeafletMap,100);
+    else{setTimeout(function(){leafletMap.invalidateSize();},100);updateMapLeaflet();}
+  } else{mv.classList.remove('show');tb.classList.remove('on');}
 });
 
 // Nav close
 document.getElementById('nav-close').addEventListener('click',function(){
-  navTarget=null;document.getElementById('nav-panel').classList.remove('active');renderLocs();
+  navTarget=null;document.getElementById('nav-panel').classList.remove('active');
+  if(navLine&&leafletMap){leafletMap.removeLayer(navLine);navLine=null;}
+  renderLocs();
 });
 
 // ===== MATH =====
@@ -993,52 +1013,92 @@ function updateNavPanel(){
 
 function startNav(loc){
   navTarget=loc;document.getElementById('nav-panel').classList.add('active');
-  updateNavPanel();renderLocs();
+  updateNavPanel();renderLocs();updateMapLeaflet();
+}
+window.startNavFromMap=function(name){
+  for(var i=0;i<LOCS.length;i++){
+    if(LOCS[i].name===name){startNav(LOCS[i]);if(leafletMap)leafletMap.closePopup();break;}
+  }
+};
+
+// ===== LEAFLET MAP =====
+var leafletMap=null;
+var mapMarkers=[];
+var userMarker=null;
+var navLine=null;
+var currentTileLayer=null;
+var tileIdx=0;
+var TILES=[
+  {name:'داكنة',url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',attr:'CartoDB'},
+  {name:'تضاريس',url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attr:'OpenTopoMap'},
+  {name:'قمر صناعي',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Esri'},
+  {name:'عادية',url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'OSM'}
+];
+var catColors={truffle:'#D4A54A',wadi:'#5B9BD5',faydah:'#62A842',shaaban:'#4DB8A8',well:'#D4A853'};
+
+function initLeafletMap(){
+  if(leafletMap) return;
+  try{
+    leafletMap=L.map('leaflet-map',{
+      center:[25.5,44],zoom:6,zoomControl:true,attributionControl:false,
+      maxBounds:[[14,32],[34,58]],minZoom:5,maxZoom:16
+    });
+    currentTileLayer=L.tileLayer(TILES[0].url,{subdomains:'abcd',maxZoom:18}).addTo(leafletMap);
+    addMapMarkers();
+    setTimeout(function(){leafletMap.invalidateSize();},200);
+  }catch(e){
+    document.getElementById('leaflet-map').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--dim);font-size:13px;text-align:center;padding:20px">يتطلب اتصال بالإنترنت لتحميل الخريطة</div>';
+  }
 }
 
-// ===== SVG MAP =====
-var MAP_BOUNDS={minLat:16,maxLat:33,minLng:34,maxLng:56};
-function latLngToSVG(lat,lng){
-  return{x:((lng-MAP_BOUNDS.minLng)/(MAP_BOUNDS.maxLng-MAP_BOUNDS.minLng))*400,
-         y:(1-(lat-MAP_BOUNDS.minLat)/(MAP_BOUNDS.maxLat-MAP_BOUNDS.minLat))*400};
-}
-
-function updateMapSVG(){
-  if(!mapVisible) return;
-  var svg=document.getElementById('map-svg');
-  var catColors={truffle:'#D4A54A',wadi:'#5B9BD5',faydah:'#62A842',shaaban:'#4DB8A8',well:'#D4A853'};
-
-  // Saudi border (simplified)
-  var borderPts=[
-    [39.2,32.3],[42,31.1],[44.6,29.4],[46.5,29.1],[48.4,28.5],[49.1,27.5],[50.1,26.1],[50.6,24.9],
-    [51.6,24.3],[51.3,22.6],[55.1,22.6],[56.3,24.3],[56,25.5],[55,26.5],[54.5,24.8],[52,23.2],
-    [50.6,24.9],[50.1,26.1],[49.1,27.5],[48.4,28.5],[46.5,29.1],[44.6,29.4],[42,31.1],[39.2,32.3],
-    [38,30.5],[36.5,29],[36.5,28],[36.5,26],[37.5,24.5],[38.5,22],[39.5,21.5],[40,19.5],[42,17],[43.5,17],
-    [45,17.5],[47,18.5],[46.5,20],[45,21],[44.5,22],[44.6,29.4]
-  ];
-  var border='M'+borderPts.map(function(c){var p=latLngToSVG(c[1],c[0]);return p.x+','+p.y}).join(' L')+' Z';
-
-  var html='<path d="'+border+'" fill="rgba(30,26,20,.6)" stroke="rgba(138,125,107,.3)" stroke-width="1"/>';
-
+function addMapMarkers(){
+  if(!leafletMap) return;
+  for(var i=0;i<mapMarkers.length;i++) leafletMap.removeLayer(mapMarkers[i]);
+  mapMarkers=[];
   for(var i=0;i<LOCS.length;i++){
     if(activeCat!=='all'&&LOCS[i].cat!==activeCat) continue;
-    var p=latLngToSVG(LOCS[i].lat,LOCS[i].lng);
-    var col=catColors[LOCS[i].cat]||'#888';
-    var r=navTarget&&navTarget.name===LOCS[i].name?5:3;
-    html+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+r+'" fill="'+col+'" opacity=".8" stroke="rgba(0,0,0,.4)" stroke-width="0.5"/>';
+    var loc=LOCS[i];
+    var col=catColors[loc.cat]||'#888';
+    var isNav=navTarget&&navTarget.name===loc.name;
+    var marker=L.circleMarker([loc.lat,loc.lng],{
+      radius:isNav?8:5,fillColor:col,color:'rgba(0,0,0,.5)',weight:1,fillOpacity:.85
+    }).addTo(leafletMap);
+    marker.bindPopup('<div style="direction:rtl;font-family:-apple-system,sans-serif;min-width:120px"><b style="color:'+col+'">'+loc.name+'</b><br><span style="font-size:11px;color:#888">'+loc.region+'</span><br><span style="font-size:10px;color:#aaa">'+loc.desc+'</span><button class="popup-nav-btn" onclick="startNavFromMap(\''+loc.name.replace(/'/g,"\\'")+'\')">ملاحة</button></div>');
+    marker.locData=loc;
+    mapMarkers.push(marker);
   }
+}
 
+function updateMapLeaflet(){
+  if(!mapVisible||!leafletMap) return;
+  addMapMarkers();
   if(gLat!==null){
-    var up=latLngToSVG(gLat,gLng);
-    html+='<circle cx="'+up.x+'" cy="'+up.y+'" r="6" fill="#5B9BD5" opacity=".3"/>';
-    html+='<circle cx="'+up.x+'" cy="'+up.y+'" r="3" fill="#5B9BD5" stroke="#fff" stroke-width="1"/>';
+    if(userMarker) leafletMap.removeLayer(userMarker);
+    var userIcon=L.divIcon({
+      className:'',
+      html:'<div style="width:14px;height:14px;background:#5B9BD5;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(91,155,213,.6)" class="loc-pulse"></div>',
+      iconSize:[14,14],iconAnchor:[7,7]
+    });
+    userMarker=L.marker([gLat,gLng],{icon:userIcon,zIndexOffset:1000}).addTo(leafletMap);
     if(navTarget){
-      var tp=latLngToSVG(navTarget.lat,navTarget.lng);
-      html+='<line x1="'+up.x+'" y1="'+up.y+'" x2="'+tp.x+'" y2="'+tp.y+'" stroke="'+catColors[navTarget.cat]+'" stroke-width="1" stroke-dasharray="4,3" opacity=".6"/>';
+      if(navLine) leafletMap.removeLayer(navLine);
+      navLine=L.polyline([[gLat,gLng],[navTarget.lat,navTarget.lng]],{
+        color:catColors[navTarget.cat]||'#D4A54A',weight:2,dashArray:'8,6',opacity:.7
+      }).addTo(leafletMap);
     }
   }
-  svg.innerHTML=html;
 }
+
+// Layer toggle
+document.getElementById('map-layer-btn').addEventListener('click',function(){
+  tileIdx=(tileIdx+1)%TILES.length;
+  if(currentTileLayer&&leafletMap) leafletMap.removeLayer(currentTileLayer);
+  currentTileLayer=L.tileLayer(TILES[tileIdx].url,{subdomains:'abcd',maxZoom:18}).addTo(leafletMap);
+  this.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'+TILES[tileIdx].name;
+});
+
+// Compat wrapper
+function updateMapSVG(){updateMapLeaflet();}
 
 // ===== RENDER LOCATIONS =====
 function renderLocs(){
@@ -1105,6 +1165,7 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){
 // ========== INIT ==========
 startCam();
 renderLocs();
+if(mapVisible) setTimeout(initLeafletMap,300);
 
 })();
 </script>

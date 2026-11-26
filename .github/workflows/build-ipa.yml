@@ -44,8 +44,10 @@ jobs:
               webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
               webView.navigationDelegate = self
               webView.scrollView.bounces = false
+              webView.scrollView.contentInsetAdjustmentBehavior = .never
               webView.isOpaque = false
               webView.backgroundColor = .black
+              view.backgroundColor = UIColor(red: 13/255, green: 11/255, blue: 9/255, alpha: 1)
               view.addSubview(webView)
               if let htmlPath = Bundle.main.path(forResource: "index", ofType: "html") {
                 do {
@@ -56,8 +58,13 @@ jobs:
                 }
               }
             }
+            override func viewDidLayoutSubviews() {
+              super.viewDidLayoutSubviews()
+              webView.frame = view.bounds
+            }
             override var prefersStatusBarHidden: Bool { return true }
             override var preferredStatusBarStyle: UIStatusBarStyle { return .lightContent }
+            override var prefersHomeIndicatorAutoHidden: Bool { return true }
           }
           SWIFT
 
