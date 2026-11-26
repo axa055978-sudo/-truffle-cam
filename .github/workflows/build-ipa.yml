@@ -10,63 +10,133 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+      - name: Install xcodegen
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install xcodegen
 
-      - name: Prepare web content
+      - name: Create app source files
         run: |
-          mkdir -p www
-          cp index.html www/
+          mkdir -p Sources Resources
 
-      - name: Init npm and install Capacitor
+          cp index.html Resources/
+
+          cat > Sources/AppDelegate.swift << 'EOF'
+          import UIKit
+
+          @main
+          class AppDelegate: UIResponder, UIApplicationDelegate {
+              var window: UIWindow?
+
+              func application(_ application: UIApplication,
+                  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+                  window = UIWindow(frame: UIScreen.main.bounds)
+                  window?.rootViewController = ViewController()
+                  window?.makeKeyAndVisible()
+                  return true
+              }
+          }
+          EOF
+
+          cat > Sources/ViewController.swift << 'EOF'
+          import UIKit
+          import WebKit
+
+          class ViewController: UIViewController {
+              override func viewDidLoad() {
+                  super.viewDidLoad()
+                  let config = WKWebViewConfiguration()
+                  config.allowsInlineMediaPlayback = true
+                  config.mediaTypesRequiringUserActionForPlayback = []
+                  let wv = WKWebView(frame: view.bounds, configuration: config)
+                  wv.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                  view.addSubview(wv)
+                  if let u = Bundle.main.url(forResource: "index", withExtension: "html") {
+                      wv.loadFileURL(u, allowingReadAccessTo: u.deletingLastPathComponent())
+                  }
+              }
+
+              override var prefersStatusBarHidden: Bool { true }
+          }
+          EOF
+
+          cat > Resources/Info.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>TruffleDetector</string>
+            <key>CFBundleDisplayName</key>
+            <string>TruffleDetector</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.alpha.truffle</string>
+            <key>CFBundleVersion</key>
+            <string>1</string>
+            <key>CFBundleShortVersionString</key>
+            <string>1.0</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleExecutable</key>
+            <string>TruffleDetector</string>
+            <key>LSRequiresIPhoneOS</key>
+            <true/>
+            <key>UILaunchScreen</key>
+            <dict/>
+            <key>UISupportedInterfaceOrientations</key>
+            <array>
+              <string>UIInterfaceOrientationPortrait</string>
+            </array>
+            <key>NSCameraUsageDescription</key>
+            <string>Camera needed to scan terrain for truffles</string>
+            <key>NSLocationWhenInUseUsageDescription</key>
+            <string>Location needed to map truffle spots</string>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Create Xcode project spec
         run: |
-          npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/ios
+          cat > project.yml << 'EOF'
+          name: TruffleDetector
+          options:
+            deploymentTarget:
+              iOS: "15.0"
+          targets:
+            TruffleDetector:
+              type: application
+              platform: iOS
+              sources:
+                - path: Sources
+              resources:
+                - path: Resources
+              settings:
+                base:
+                  INFOPLIST_FILE: Resources/Info.plist
+                  CODE_SIGNING_ALLOWED: "NO"
+                  CODE_SIGN_IDENTITY: ""
+                  PRODUCT_BUNDLE_IDENTIFIER: com.alpha.truffle
+          EOF
 
-      - name: Init Capacitor
-        run: npx cap init TruffleDetector com.alpha.truffle --web-dir www
-
-      - name: Update CocoaPods
-        run: |
-          sudo gem install cocoapods
-          pod --version
-
-      - name: Add iOS platform
-        run: npx cap add ios
-
-      - name: Sync iOS
-        run: npx cap sync ios
-
-      - name: Configure iOS permissions
-        run: |
-          PLIST="ios/App/App/Info.plist"
-          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Camera needed to analyze soil'" "$PLIST" 2>/dev/null || true
-          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'Location needed for truffle mapping'" "$PLIST" 2>/dev/null || true
+      - name: Generate Xcode project
+        run: xcodegen generate
 
       - name: Build iOS app
         run: |
-          cd ios/App
-          xcodebuild -workspace App.xcworkspace \
-            -scheme App \
+          xcodebuild \
+            -project TruffleDetector.xcodeproj \
+            -scheme TruffleDetector \
             -sdk iphoneos \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_IDENTITY="" \
             ONLY_ACTIVE_ARCH=NO \
-            -derivedDataPath build \
-            | tail -20
+            -derivedDataPath build
 
       - name: Package IPA
         run: |
-          APP_PATH=$(find ios/App/build -name "*.app" -type d | head -1)
-          if [ -z "$APP_PATH" ]; then
-            echo "Error: .app not found"
-            exit 1
-          fi
-          mkdir -p Payload
-          cp -r "$APP_PATH" Payload/
+          APP=$(find build -name "*.app" -type d | head -1)
+          mkdir Payload
+          cp -r "$APP" Payload/
           zip -r TruffleDetector.ipa Payload
 
       - uses: actions/upload-artifact@v4
