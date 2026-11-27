@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="كاشف الفقع">
 <meta name="theme-color" content="#0D0B09">
 <title>كاشف الفقع الذكي</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css"/>
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <style>
 :root{
   --bg:#0D0B09;--surface:#161310;--card:#1E1A14;--card2:#262118;--card3:#2E281F;
@@ -113,7 +113,7 @@ nav button .ni svg{width:100%;height:100%}
 .clear-btn{display:block;margin:12px auto 0;background:none;border:1px solid var(--dim3);color:var(--dim);padding:8px 20px;border-radius:var(--radius2);font-size:12px;cursor:pointer;transition:all .2s}
 .clear-btn:active{background:var(--red-bg);border-color:var(--red);color:var(--red)}
 
-/* ===== MAP TAB — GARMIN STYLE ===== */
+/* ===== MAP TAB ===== */
 #t-map{padding:0;display:flex;flex-direction:column;height:100%}
 
 /* Compass & nav panel */
@@ -140,24 +140,10 @@ nav button .ni svg{width:100%;height:100%}
 .nav-stat-label{font-size:8px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.3px;margin-top:1px}
 .nav-close{position:absolute;top:10px;left:10px;background:var(--dim3);border:none;color:var(--dim);width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
-/* Category filters */
-.map-filters{display:flex;gap:5px;overflow-x:auto;padding:10px 16px;flex-shrink:0;-webkit-overflow-scrolling:touch;background:var(--bg)}
-.map-filters::-webkit-scrollbar{display:none}
-.cf-btn{flex-shrink:0;padding:7px 14px;border-radius:var(--radius2);border:1px solid var(--dim3);background:none;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px}
-.cf-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.cf-btn.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border-color:var(--gold);box-shadow:0 2px 8px rgba(212,165,74,.25)}
-
 /* Map View */
 #map-view{position:relative;width:100%;flex:1;background:var(--card);overflow:hidden;display:none}
 #map-view.show{display:flex;flex-direction:column}
-#leaflet-map{flex:1;width:100%;z-index:1}
-#leaflet-map .leaflet-control-attribution{display:none}
-#leaflet-map.desert-theme .leaflet-tile-pane{filter:sepia(0.22) saturate(0.78) brightness(1.06) hue-rotate(-8deg);transition:filter .4s}
-#leaflet-map.desert-theme .leaflet-popup-content-wrapper{background:#2A2318!important;border-color:#4A3D2E!important}
-#leaflet-map.desert-theme .leaflet-popup-tip{background:#2A2318!important;border-color:#4A3D2E!important}
-#leaflet-map .leaflet-control-zoom{border:none!important}
-#leaflet-map .leaflet-control-zoom a{background:var(--card2)!important;color:var(--gold)!important;border:1px solid var(--dim3)!important;width:28px!important;height:28px!important;line-height:28px!important;font-size:14px!important;border-radius:8px!important}
-#leaflet-map .leaflet-control-zoom a:first-child{margin-bottom:3px!important;border-radius:8px!important}
+#map-container{flex:1;width:100%;z-index:1}
 /* Coordinate Search */
 .coord-search{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;gap:5px;direction:ltr;width:calc(100% - 100px)}
 .coord-search input{flex:1;padding:10px 14px;border-radius:12px;border:1.5px solid var(--dim3);background:rgba(22,19,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-size:16px;font-family:'SF Mono',Menlo,monospace;text-align:center;outline:none;letter-spacing:.5px}
@@ -169,51 +155,19 @@ nav button .ni svg{width:100%;height:100%}
 .map-legend{position:absolute;bottom:8px;left:8px;display:flex;gap:8px;z-index:1000;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:3px;font-size:8px;color:var(--dim);font-weight:600}
 .legend-dot{width:6px;height:6px;border-radius:50%}
-.loc-pulse{border-radius:50%;animation:locPulse 2s infinite}
+/* MapLibre overrides */
+.maplibregl-popup-content{background:var(--card)!important;color:var(--text)!important;border-radius:10px!important;border:1px solid var(--dim3)!important;box-shadow:0 4px 20px rgba(0,0,0,.5)!important;padding:10px 14px!important}
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip{border-top-color:var(--card)!important}
+.maplibregl-popup-anchor-top .maplibregl-popup-tip{border-bottom-color:var(--card)!important}
+.maplibregl-popup-close-button{color:var(--dim)!important;font-size:18px!important;right:4px!important;top:2px!important}
+.maplibregl-ctrl-group{background:var(--card2)!important;border:1px solid var(--dim3)!important;border-radius:8px!important;overflow:hidden}
+.maplibregl-ctrl-group button{color:var(--gold)!important;width:28px!important;height:28px!important}
+.maplibregl-ctrl-group button+button{border-top:1px solid var(--dim3)!important}
+.maplibregl-ctrl-group button span{color:var(--gold)!important}
+.maplibregl-ctrl-attrib{display:none!important}
+.user-dot{width:14px;height:14px;background:#5B9BD5;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(91,155,213,.6);animation:locPulse 2s infinite}
 @keyframes locPulse{0%{box-shadow:0 0 0 0 rgba(91,155,213,.6)}70%{box-shadow:0 0 0 12px rgba(91,155,213,0)}100%{box-shadow:0 0 0 0 rgba(91,155,213,0)}}
-.map-label{font-size:18px;font-weight:900;color:#fff;text-shadow:0 0 6px rgba(0,0,0,.98),0 0 12px rgba(0,0,0,.85),1px 1px 4px rgba(0,0,0,.95),2px 2px 6px rgba(0,0,0,.7);white-space:nowrap;direction:rtl;pointer-events:none;letter-spacing:.3px}
-.map-label-truffle{color:#D4A54A}
-.map-label-faydah{color:#8FD46E}
-.map-label-wadi{color:#8FC4E8}
-.map-label-shaaban{color:#7FD8CA}
-.map-label-well{color:#E8C87A}
-#leaflet-map.desert-theme .map-label{text-shadow:0 0 4px rgba(80,60,30,.95),0 0 8px rgba(60,45,20,.7),1px 1px 3px rgba(40,30,10,.9)}
-#leaflet-map.desert-theme .map-label-truffle{color:#BA7007}
-#leaflet-map.desert-theme .map-label-faydah{color:#2D8A1F}
-#leaflet-map.desert-theme .map-label-wadi{color:#2060C0}
-#leaflet-map.desert-theme .map-label-shaaban{color:#1A7A6A}
-#leaflet-map.desert-theme .map-label-well{color:#8A5D10}
-.leaflet-popup-content-wrapper{background:var(--card)!important;color:var(--text)!important;border-radius:10px!important;border:1px solid var(--dim3)!important;box-shadow:0 4px 16px rgba(0,0,0,.5)!important}
-.leaflet-popup-tip{background:var(--card)!important;border:1px solid var(--dim3)!important}
-.leaflet-popup-close-button{color:var(--dim)!important;font-size:16px!important}
 .popup-nav-btn{display:block;margin-top:6px;padding:4px 10px;background:var(--gold);color:#000;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;width:100%;text-align:center}
-
-/* Stats row */
-.stat-row{display:flex;gap:8px;margin-bottom:8px}
-.stat-card{flex:1;background:var(--card);border-radius:12px;padding:10px;text-align:center;border:1px solid var(--dim3)}
-.stat-val{font-size:18px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
-.stat-label{font-size:8px;color:var(--dim);font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:.3px}
-
-/* Location list */
-#loc-box{flex:1;overflow-y:auto;padding:0 16px 16px;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch}
-.lc{background:var(--card);border-radius:var(--radius);padding:11px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;border:1px solid var(--dim3)}
-.lc:active{background:var(--card2);border-color:var(--dim2)}
-.lc.navigating{border-color:var(--gold);background:linear-gradient(135deg,rgba(212,165,74,.08),var(--card))}
-.lc-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0;letter-spacing:-.5px}
-.lc-icon.type-truffle{background:linear-gradient(145deg,var(--gold),var(--brown))}
-.lc-icon.type-wadi{background:linear-gradient(145deg,var(--blue),var(--blue2))}
-.lc-icon.type-faydah{background:linear-gradient(145deg,var(--green),var(--green2))}
-.lc-icon.type-shaaban{background:linear-gradient(145deg,var(--cyan),#2D9080)}
-.lc-icon.type-well{background:linear-gradient(145deg,var(--amber),#9A7025)}
-.lc-body{flex:1;min-width:0}
-.lc-name{font-size:12px;font-weight:700;margin-bottom:2px}
-.lc-region{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lc-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
-.lc-dist{font-size:11px;color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
-.lc-bearing{font-size:9px;color:var(--dim);font-weight:500}
-.lc-nav-btn{background:var(--card2);border:1px solid var(--dim3);color:var(--gold);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s}
-.lc-nav-btn:active{background:var(--gold);color:#000;border-color:var(--gold)}
-.lc-nav-btn svg{width:16px;height:16px}
 
 /* ===== TIPS TAB ===== */
 #t-tips{padding:14px 16px}
@@ -328,7 +282,7 @@ nav button .ni svg{width:100%;height:100%}
         <button id="coord-go">ابحث</button>
       </div>
       <button class="map-layer-btn" id="map-layer-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>صحراوية</button>
-      <div id="leaflet-map"></div>
+      <div id="map-container"></div>
       <div class="map-legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>فقع</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>فياض</div>
@@ -403,7 +357,7 @@ function switchTab(targetId){
   var sec=document.getElementById(targetId);
   if(sec) sec.classList.add('active');
   if(targetId==='t-hist') renderHist();
-  if(targetId==='t-map'){updateNavPanel();if(leafletMap){setTimeout(function(){leafletMap.invalidateSize();},100);updateMapLeaflet();}else{setTimeout(initLeafletMap,100);}}
+  if(targetId==='t-map'){updateNavPanel();if(glMap){setTimeout(function(){glMap.resize();},100);refreshMapData();}else{setTimeout(initMap,100);}}
 }
 for(var i=0;i<navBtns.length;i++){
   (function(btn){
@@ -869,8 +823,8 @@ var LOCS=[
   {name:'الزلفي',region:'الرياض',lat:26.30,lng:44.82,cat:'truffle',desc:'شمال الرياض'},
   {name:'ضرية',region:'القصيم',lat:24.72,lng:42.78,cat:'truffle',desc:'جنوب غرب القصيم'},
 
-  // ===== فياض وروضات (12) =====
-  {name:'روضة خريم',region:'الرياض',lat:25.20,lng:45.70,cat:'faydah',desc:'مشهورة بالفقع والأعشاب'},
+  // ===== فياض وروضات (16) =====
+  {name:'روضة خريم',region:'الرياض',lat:25.40,lng:47.30,cat:'faydah',desc:'محمية ملكية مشهورة بالفقع'},
   {name:'روضة نورة',region:'الرياض',lat:24.85,lng:46.72,cat:'faydah',desc:'شمال الرياض'},
   {name:'روضة التنهاة',region:'الرياض',lat:25.50,lng:46.00,cat:'faydah',desc:'روضة واسعة'},
   {name:'فيضة المسيعيد',region:'القصيم',lat:26.50,lng:44.00,cat:'faydah',desc:'فيضة القصيم'},
@@ -882,15 +836,19 @@ var LOCS=[
   {name:'روضة المازمية',region:'الرياض',lat:24.60,lng:46.50,cat:'faydah',desc:'جنوب الرياض'},
   {name:'روضة الحبل',region:'القصيم',lat:26.20,lng:44.20,cat:'faydah',desc:'جنوب القصيم'},
   {name:'فيضة الصرو',region:'حائل',lat:27.80,lng:41.50,cat:'faydah',desc:'شمال حائل'},
+  {name:'فيضة صلفيق',region:'حائل',lat:29.96,lng:42.72,cat:'faydah',desc:'شمال حائل'},
+  {name:'روضة الحسو',region:'الرياض',lat:24.80,lng:47.10,cat:'faydah',desc:'شرق الرياض'},
+  {name:'فيضة أم غار',region:'حائل',lat:29.66,lng:43.11,cat:'faydah',desc:'منطقة حائل'},
+  {name:'فيضة العشر',region:'حائل',lat:28.80,lng:42.50,cat:'faydah',desc:'شمال غرب حائل'},
 
-  // ===== أودية (14) =====
+  // ===== أودية (17) =====
   {name:'وادي الرمة',region:'القصيم',lat:26.00,lng:42.00,cat:'wadi',desc:'أطول وادي — 600 كم'},
   {name:'وادي الباطن',region:'المنطقة الشرقية',lat:28.50,lng:45.50,cat:'wadi',desc:'وادي حفر الباطن'},
-  {name:'وادي حنيفة',region:'الرياض',lat:24.63,lng:46.72,cat:'wadi',desc:'وادي الرياض الرئيسي'},
-  {name:'وادي الدواسر',region:'الرياض',lat:20.50,lng:44.70,cat:'wadi',desc:'جنوب الرياض'},
+  {name:'وادي حنيفة',region:'الرياض',lat:24.63,lng:46.72,cat:'wadi',desc:'وادي الرياض الرئيسي — 120 كم'},
+  {name:'وادي الدواسر',region:'الرياض',lat:20.49,lng:44.73,cat:'wadi',desc:'جنوب نجد'},
   {name:'وادي السرحان',region:'الجوف',lat:30.50,lng:38.00,cat:'wadi',desc:'وادي شمالي كبير'},
-  {name:'وادي تثليث',region:'عسير',lat:19.50,lng:43.50,cat:'wadi',desc:'وادي عسير'},
-  {name:'وادي بيشة',region:'عسير',lat:20.00,lng:42.60,cat:'wadi',desc:'155 كم'},
+  {name:'وادي تثليث',region:'عسير',lat:19.50,lng:44.20,cat:'wadi',desc:'جنوب المملكة'},
+  {name:'وادي بيشة',region:'عسير',lat:20.00,lng:42.60,cat:'wadi',desc:'155 كم في عسير'},
   {name:'وادي الجرير',region:'القصيم',lat:25.80,lng:43.20,cat:'wadi',desc:'رافد وادي الرمة'},
   {name:'وادي حبونة',region:'نجران',lat:18.50,lng:44.00,cat:'wadi',desc:'وادي نجران'},
   {name:'وادي فاطمة',region:'مكة',lat:21.70,lng:39.80,cat:'wadi',desc:'غرب مكة'},
@@ -898,10 +856,13 @@ var LOCS=[
   {name:'وادي العقيق',region:'المدينة',lat:24.47,lng:39.60,cat:'wadi',desc:'وادي المدينة'},
   {name:'وادي المياه',region:'القصيم',lat:26.10,lng:43.00,cat:'wadi',desc:'جنوب القصيم'},
   {name:'وادي أبو علي',region:'المنطقة الشرقية',lat:27.00,lng:49.00,cat:'wadi',desc:'شرق السعودية'},
+  {name:'وادي لبن',region:'الرياض',lat:24.60,lng:46.58,cat:'wadi',desc:'رافد وادي حنيفة الغربي'},
+  {name:'وادي نمار',region:'الرياض',lat:24.57,lng:46.62,cat:'wadi',desc:'متنزه وسد نمار'},
+  {name:'وادي تربة',region:'مكة',lat:21.20,lng:41.63,cat:'wadi',desc:'شرق الطائف'},
 
-  // ===== شعبان (10) =====
+  // ===== شعبان (17) =====
   {name:'شعيب الحيسية',region:'الرياض',lat:25.30,lng:46.50,cat:'shaaban',desc:'شرق الرياض'},
-  {name:'شعيب لحاء',region:'الرياض',lat:24.80,lng:46.30,cat:'shaaban',desc:'جنوب الرياض'},
+  {name:'شعيب لحا',region:'الرياض',lat:24.65,lng:46.63,cat:'shaaban',desc:'رافد وادي حنيفة'},
   {name:'شعيب الوقف',region:'القصيم',lat:26.00,lng:43.50,cat:'shaaban',desc:'وسط القصيم'},
   {name:'شعيب أبو شجرة',region:'حائل',lat:27.60,lng:41.80,cat:'shaaban',desc:'حائل'},
   {name:'شعيب المريخي',region:'الرياض',lat:24.60,lng:46.60,cat:'shaaban',desc:'وسط الرياض'},
@@ -909,9 +870,16 @@ var LOCS=[
   {name:'شعيب الشعبة',region:'القصيم',lat:26.30,lng:43.70,cat:'shaaban',desc:'القصيم'},
   {name:'شعيب الأوسط',region:'حائل',lat:27.40,lng:41.50,cat:'shaaban',desc:'جنوب حائل'},
   {name:'شعيب وثيلان',region:'الرياض',lat:25.10,lng:46.20,cat:'shaaban',desc:'شرق الرياض'},
-  {name:'شعيب ملهم',region:'الرياض',lat:25.05,lng:46.00,cat:'shaaban',desc:'غرب الرياض'},
+  {name:'شعيب ملهم',region:'الرياض',lat:25.18,lng:46.10,cat:'shaaban',desc:'شمال الرياض'},
+  {name:'شعيب جو',region:'حائل',lat:27.50,lng:41.65,cat:'shaaban',desc:'شعيب مشهور في حائل'},
+  {name:'شعيب المسعودية',region:'الشرقية',lat:25.10,lng:47.25,cat:'shaaban',desc:'شرق الرياض'},
+  {name:'شعيب أبالجد',region:'الرياض',lat:24.55,lng:46.55,cat:'shaaban',desc:'السويدي بالرياض'},
+  {name:'شعيب صفار',region:'الرياض',lat:24.75,lng:46.50,cat:'shaaban',desc:'رافد وادي حنيفة'},
+  {name:'شعيب وبير',region:'الرياض',lat:24.70,lng:46.55,cat:'shaaban',desc:'غرب الرياض'},
+  {name:'شعيب الأيسن',region:'الرياض',lat:24.62,lng:46.75,cat:'shaaban',desc:'شرق وادي حنيفة'},
+  {name:'شعيب الودي',region:'القصيم',lat:26.06,lng:44.47,cat:'shaaban',desc:'شمال القصيم'},
 
-  // ===== قلبان — آبار (12) =====
+  // ===== قلبان — آبار (16) =====
   {name:'قليب الحيد',region:'الرياض',lat:25.60,lng:45.80,cat:'well',desc:'قليب شمال الرياض'},
   {name:'قليب أبو جلال',region:'القصيم',lat:26.70,lng:43.60,cat:'well',desc:'وسط القصيم'},
   {name:'قلبان الأثلة',region:'حائل',lat:27.90,lng:41.30,cat:'well',desc:'آبار قديمة'},
@@ -924,51 +892,21 @@ var LOCS=[
   {name:'قليب الشبيكية',region:'القصيم',lat:26.90,lng:44.10,cat:'well',desc:'شمال القصيم'},
   {name:'قلبان التيس',region:'حائل',lat:27.20,lng:41.80,cat:'well',desc:'جنوب حائل'},
   {name:'قليب الجفر',region:'المنطقة الشرقية',lat:28.90,lng:47.20,cat:'well',desc:'شمال الشرقية'},
-
-  // ===== مواقع إضافية — أودية (10) =====
-  {name:'وادي حنيفة',region:'الرياض',lat:24.58,lng:46.71,cat:'wadi',desc:'120 كم يخترق الرياض'},
-  {name:'وادي لبن',region:'الرياض',lat:24.60,lng:46.58,cat:'wadi',desc:'رافد وادي حنيفة الغربي'},
-  {name:'وادي نمار',region:'الرياض',lat:24.57,lng:46.62,cat:'wadi',desc:'متنزه وسد نمار'},
-  {name:'وادي السرحان',region:'الجوف',lat:30.00,lng:38.50,cat:'wadi',desc:'وادي كبير شمال المملكة'},
-  {name:'وادي الباطن',region:'الحدود الشمالية',lat:29.00,lng:46.00,cat:'wadi',desc:'امتداد وادي الرمة'},
-  {name:'وادي الدواسر',region:'الرياض',lat:20.49,lng:44.73,cat:'wadi',desc:'جنوب نجد'},
-  {name:'وادي تثليث',region:'عسير',lat:19.50,lng:44.20,cat:'wadi',desc:'جنوب المملكة'},
-  {name:'وادي بيشة',region:'عسير',lat:20.00,lng:42.70,cat:'wadi',desc:'وادي كبير في عسير'},
-  {name:'وادي تربة',region:'مكة',lat:21.20,lng:41.63,cat:'wadi',desc:'شرق الطائف'},
-  {name:'وادي فاطمة',region:'مكة',lat:21.95,lng:39.80,cat:'wadi',desc:'شمال شرق جدة'},
-
-  // ===== مواقع إضافية — شعبان (8) =====
-  {name:'شعيب لحا',region:'الرياض',lat:24.65,lng:46.63,cat:'shaaban',desc:'رافد وادي حنيفة'},
-  {name:'شعيب جو',region:'حائل',lat:27.50,lng:41.65,cat:'shaaban',desc:'شعيب مشهور في حائل'},
-  {name:'شعيب المسعودية',region:'الشرقية',lat:25.10,lng:47.25,cat:'shaaban',desc:'شرق الرياض'},
-  {name:'شعيب الودي',region:'الرياض',lat:26.06,lng:46.47,cat:'shaaban',desc:'شمال الرياض'},
-  {name:'شعيب أبالجد',region:'الرياض',lat:24.55,lng:46.55,cat:'shaaban',desc:'السويدي بالرياض'},
-  {name:'شعيب صفار',region:'الرياض',lat:24.75,lng:46.50,cat:'shaaban',desc:'رافد وادي حنيفة'},
-  {name:'شعيب وبير',region:'الرياض',lat:24.70,lng:46.55,cat:'shaaban',desc:'غرب الرياض'},
-  {name:'شعيب الأيسن',region:'الرياض',lat:24.62,lng:46.75,cat:'shaaban',desc:'شرق وادي حنيفة'},
-
-  // ===== مواقع إضافية — فياض وروضات (8) =====
-  {name:'روضة خريم',region:'الرياض',lat:25.40,lng:47.30,cat:'faydah',desc:'محمية ملكية مشهورة'},
-  {name:'روضة التنهاة',region:'القصيم',lat:26.50,lng:44.00,cat:'faydah',desc:'روضة كبيرة في القصيم'},
-  {name:'فيضة صلفيق',region:'حائل',lat:29.96,lng:42.72,cat:'faydah',desc:'شمال حائل'},
-  {name:'روضة الحسو',region:'الرياض',lat:24.80,lng:47.10,cat:'faydah',desc:'شرق الرياض'},
-  {name:'فيضة أم غار',region:'حائل',lat:29.66,lng:43.11,cat:'faydah',desc:'منطقة حائل'},
-  {name:'روضة نوره',region:'الرياض',lat:24.95,lng:46.85,cat:'faydah',desc:'شمال الرياض'},
-  {name:'روضة العتك',region:'القصيم',lat:26.20,lng:43.80,cat:'faydah',desc:'جنوب القصيم'},
-  {name:'فيضة العشر',region:'حائل',lat:28.80,lng:42.50,cat:'faydah',desc:'شمال غرب حائل'},
-
-  // ===== مواقع إضافية — آبار (4) =====
-  {name:'بئر هداج',region:'حائل',lat:27.52,lng:41.69,cat:'well',desc:'بئر تاريخي مشهور بحائل'},
+  {name:'بئر هداج',region:'حائل',lat:27.53,lng:41.68,cat:'well',desc:'بئر تاريخي مشهور'},
   {name:'عيون الأحساء',region:'الشرقية',lat:25.38,lng:49.60,cat:'well',desc:'ينابيع الأحساء الشهيرة'},
   {name:'بئر الحلوة',region:'الرياض',lat:24.90,lng:46.10,cat:'well',desc:'بئر قديم قرب الرياض'},
   {name:'قلبان الوسيعة',region:'القصيم',lat:26.60,lng:43.50,cat:'well',desc:'منطقة القصيم'}
 ];
 
-var activeCat='all';
 var mapVisible=true;
+var catColors={truffle:'#D4A54A',wadi:'#5B9BD5',faydah:'#62A842',shaaban:'#4DB8A8',well:'#D4A853'};
+
+// RTL text plugin for Arabic
+try{maplibregl.setRTLTextPlugin('https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js',null,true);}catch(e){}
 
 // Coordinate search
 var coordSearchMarker=null;
+var coordSearchPopup=null;
 document.getElementById('coord-go').addEventListener('click',function(){doCoordSearch();});
 document.getElementById('coord-input').addEventListener('keydown',function(e){if(e.key==='Enter')doCoordSearch();});
 function doCoordSearch(){
@@ -980,18 +918,16 @@ function doCoordSearch(){
   var lat=parseFloat(parts[0].trim());
   var lng=parseFloat(parts[1].trim());
   if(isNaN(lat)||isNaN(lng)||lat<-90||lat>90||lng<-180||lng>180){showMsg('إحداثيات غير صحيحة');return;}
-  if(!leafletMap){showMsg('الخريطة لم تتحمل بعد');return;}
-  leafletMap.flyTo([lat,lng],14,{duration:1.5});
-  if(coordSearchMarker){leafletMap.removeLayer(coordSearchMarker);}
-  coordSearchMarker=L.marker([lat,lng],{
-    icon:L.divIcon({
-      className:'',
-      html:'<div style="width:20px;height:20px;background:var(--red);border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px rgba(212,96,60,.7)"></div>',
-      iconSize:[20,20],iconAnchor:[10,10]
-    }),
-    zIndexOffset:2000
-  }).addTo(leafletMap);
-  coordSearchMarker.bindPopup('<div style="direction:rtl;font-family:-apple-system,sans-serif;text-align:center"><b style="font-size:13px;color:var(--gold)">📍 '+lat.toFixed(5)+', '+lng.toFixed(5)+'</b></div>').openPopup();
+  if(!glMap){showMsg('الخريطة لم تتحمل بعد');return;}
+  glMap.flyTo({center:[lng,lat],zoom:14,duration:1500});
+  if(coordSearchMarker){coordSearchMarker.remove();coordSearchMarker=null;}
+  if(coordSearchPopup){coordSearchPopup.remove();coordSearchPopup=null;}
+  var el=document.createElement('div');
+  el.style.cssText='width:20px;height:20px;background:#D4603C;border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px rgba(212,96,60,.7)';
+  coordSearchMarker=new maplibregl.Marker({element:el}).setLngLat([lng,lat]).addTo(glMap);
+  coordSearchPopup=new maplibregl.Popup({offset:15,closeButton:true}).setLngLat([lng,lat])
+    .setHTML('<div style="direction:rtl;font-family:-apple-system,sans-serif;text-align:center"><b style="font-size:13px;color:#D4A54A">'+lat.toFixed(5)+', '+lng.toFixed(5)+'</b></div>')
+    .addTo(glMap);
   showMsg('تم الانتقال للإحداثيات');
   document.getElementById('coord-input').blur();
 }
@@ -999,8 +935,7 @@ function doCoordSearch(){
 // Nav close
 document.getElementById('nav-close').addEventListener('click',function(){
   navTarget=null;document.getElementById('nav-panel').classList.remove('active');
-  if(navLine&&leafletMap){leafletMap.removeLayer(navLine);navLine=null;}
-  renderLocs();
+  refreshMapData();
 });
 
 // ===== MATH =====
@@ -1044,119 +979,184 @@ function updateNavPanel(){
 
 function startNav(loc){
   navTarget=loc;document.getElementById('nav-panel').classList.add('active');
-  updateNavPanel();renderLocs();updateMapLeaflet();
+  updateNavPanel();refreshMapData();
 }
 window.startNavFromMap=function(name){
   for(var i=0;i<LOCS.length;i++){
-    if(LOCS[i].name===name){startNav(LOCS[i]);if(leafletMap)leafletMap.closePopup();break;}
+    if(LOCS[i].name===name){startNav(LOCS[i]);if(glMap){var popups=document.querySelectorAll('.maplibregl-popup');for(var j=0;j<popups.length;j++)popups[j].remove();}break;}
   }
 };
 
-// ===== LEAFLET MAP =====
-var leafletMap=null;
-var mapMarkers=[];
-var mapLabels=[];
-var userMarker=null;
-var navLine=null;
-var currentTileLayer=null;
-var tileIdx=0;
-var TILES=[
-  {name:'صحراوية',url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attr:'OpenTopoMap',desert:true},
-  {name:'تضاريس',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',attr:'Esri Topo'},
-  {name:'قمر صناعي',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Esri'},
-  {name:'عادية',url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'OSM'},
-  {name:'داكنة',url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',attr:'CartoDB'}
+// ===== MAPLIBRE GL MAP =====
+var glMap=null;
+var userMarkerGL=null;
+var locMarkers=[];
+var currentStyleIdx=0;
+
+var STYLES=[
+  {name:'صحراوية',type:'vector',url:'https://tiles.openfreemap.org/styles/liberty',desert:true},
+  {name:'تضاريس',type:'raster',tiles:['https://tile.opentopomap.org/{z}/{x}/{y}.png']},
+  {name:'قمر صناعي',type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}']},
+  {name:'عادية',type:'vector',url:'https://tiles.openfreemap.org/styles/liberty',desert:false}
 ];
-var catColors={truffle:'#D4A54A',wadi:'#5B9BD5',faydah:'#62A842',shaaban:'#4DB8A8',well:'#D4A853'};
-var catColorsDesert={truffle:'#BA7007',wadi:'#2060C0',faydah:'#2D8A1F',shaaban:'#1A7A6A',well:'#8A5D10'};
 
-function initLeafletMap(){
-  if(leafletMap) return;
+function makeRasterStyle(tiles){
+  return{version:8,sources:{raster:{type:'raster',tiles:tiles,tileSize:256,maxzoom:18}},layers:[{id:'raster-layer',type:'raster',source:'raster'}]};
+}
+
+function initMap(){
+  if(glMap) return;
   try{
-    leafletMap=L.map('leaflet-map',{
-      center:[26,44.5],zoom:7,zoomControl:true,attributionControl:false,
-      maxBounds:[[14,32],[34,58]],minZoom:5,maxZoom:17
+    var s=STYLES[0];
+    glMap=new maplibregl.Map({
+      container:'map-container',
+      style:s.type==='vector'?s.url:makeRasterStyle(s.tiles),
+      center:[44.5,26],
+      zoom:6,
+      maxBounds:[[32,14],[58,34]],
+      minZoom:5,
+      maxZoom:17,
+      attributionControl:false
     });
-    currentTileLayer=L.tileLayer(TILES[0].url,{subdomains:'abcd',maxZoom:18}).addTo(leafletMap);
-    if(TILES[0].desert) document.getElementById('leaflet-map').classList.add('desert-theme');
-    addMapMarkers();
-    setTimeout(function(){leafletMap.invalidateSize();},200);
+    glMap.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
+
+    glMap.on('style.load',function(){
+      if(STYLES[currentStyleIdx].type==='vector'){
+        applyArabicLabels();
+        if(STYLES[currentStyleIdx].desert) applyDesertTheme();
+      }
+      addLocationMarkers();
+      updateUserMarker();
+      addNavLine();
+    });
   }catch(e){
-    document.getElementById('leaflet-map').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--dim);font-size:13px;text-align:center;padding:20px">يتطلب اتصال بالإنترنت لتحميل الخريطة</div>';
+    document.getElementById('map-container').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--dim);font-size:13px;text-align:center;padding:20px">يتطلب اتصال بالإنترنت لتحميل الخريطة</div>';
   }
 }
 
-function addMapMarkers(){
-  if(!leafletMap) return;
-  var i;
-  for(i=0;i<mapMarkers.length;i++) leafletMap.removeLayer(mapMarkers[i]);
-  for(i=0;i<mapLabels.length;i++) leafletMap.removeLayer(mapLabels[i]);
-  mapMarkers=[];mapLabels=[];
-  var catSymbol={truffle:'◆',wadi:'~',faydah:'●',shaaban:'≋',well:'◉'};
-  var isDesert=document.getElementById('leaflet-map').classList.contains('desert-theme');
-  for(i=0;i<LOCS.length;i++){
-    if(activeCat!=='all'&&LOCS[i].cat!==activeCat) continue;
+function applyDesertTheme(){
+  if(!glMap) return;
+  var style=glMap.getStyle();
+  if(!style||!style.layers) return;
+  try{glMap.setPaintProperty('background','background-color','#E8D5B0');}catch(e){}
+  for(var i=0;i<style.layers.length;i++){
+    var id=style.layers[i].id;
+    var tp=style.layers[i].type;
+    try{
+      if(id.indexOf('water')!==-1){
+        if(tp==='fill') glMap.setPaintProperty(id,'fill-color','#7BA3C2');
+        if(tp==='line') glMap.setPaintProperty(id,'line-color','#6B93B2');
+      }
+      if((id.indexOf('landuse')!==-1||id.indexOf('landcover')!==-1)&&tp==='fill'){
+        glMap.setPaintProperty(id,'fill-opacity',0.15);
+      }
+      if(id.indexOf('building')!==-1&&tp==='fill'){
+        glMap.setPaintProperty(id,'fill-color','#C8B898');
+      }
+    }catch(e){}
+  }
+}
+
+function applyArabicLabels(){
+  if(!glMap) return;
+  var style=glMap.getStyle();
+  if(!style||!style.layers) return;
+  for(var i=0;i<style.layers.length;i++){
+    var layer=style.layers[i];
+    if(layer.type!=='symbol') continue;
+    try{
+      var tf=glMap.getLayoutProperty(layer.id,'text-field');
+      if(tf){
+        glMap.setLayoutProperty(layer.id,'text-field',['coalesce',['get','name:ar'],['get','name']]);
+      }
+      // increase text size
+      if(layer.layout&&typeof layer.layout['text-size']==='number'){
+        glMap.setLayoutProperty(layer.id,'text-size',layer.layout['text-size']*1.3);
+      }else if(layer.layout&&layer.layout['text-size']&&typeof layer.layout['text-size']==='object'&&layer.layout['text-size'].stops){
+        var stops=layer.layout['text-size'].stops;
+        var newStops=[];
+        for(var s=0;s<stops.length;s++) newStops.push([stops[s][0],stops[s][1]*1.3]);
+        glMap.setLayoutProperty(layer.id,'text-size',{stops:newStops});
+      }
+    }catch(e){}
+  }
+}
+
+function addLocationMarkers(){
+  // remove old markers
+  for(var i=0;i<locMarkers.length;i++) locMarkers[i].remove();
+  locMarkers=[];
+  for(var i=0;i<LOCS.length;i++){
     var loc=LOCS[i];
-    var col=isDesert?(catColorsDesert[loc.cat]||'#5C4020'):(catColors[loc.cat]||'#888');
+    var col=catColors[loc.cat]||'#888';
     var isNav=navTarget&&navTarget.name===loc.name;
-    var r=isNav?10:8;
-    var marker=L.circleMarker([loc.lat,loc.lng],{
-      radius:r,fillColor:col,color:isDesert?'#3A2A15':'#000',weight:isDesert?2.5:2,fillOpacity:.95
-    }).addTo(leafletMap);
-    marker.bindPopup('<div style="direction:rtl;font-family:-apple-system,sans-serif;min-width:130px"><b style="color:'+col+';font-size:14px">'+loc.name+'</b><br><span style="font-size:11px;color:#888">'+loc.region+'</span><br><span style="font-size:10px;color:#aaa">'+loc.desc+'</span><button class="popup-nav-btn" onclick="startNavFromMap(\''+loc.name.replace(/'/g,"\\'")+'\')">ملاحة</button></div>');
-    marker.locData=loc;
-    mapMarkers.push(marker);
-    // text label
-    var label=L.marker([loc.lat,loc.lng],{
-      icon:L.divIcon({
-        className:'map-label map-label-'+loc.cat,
-        html:(catSymbol[loc.cat]||'')+' '+loc.name,
-        iconSize:[0,0],iconAnchor:[-8,5]
-      }),
-      interactive:false
-    }).addTo(leafletMap);
-    mapLabels.push(label);
+    // marker element
+    var el=document.createElement('div');
+    var sz=isNav?18:14;
+    el.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+col+';border:2px solid rgba(255,255,255,.8);border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)';
+    if(isNav) el.style.boxShadow='0 0 12px '+col+',0 2px 8px rgba(0,0,0,.4)';
+    var marker=new maplibregl.Marker({element:el}).setLngLat([loc.lng,loc.lat]).addTo(glMap);
+    // click popup
+    (function(loc,col,marker){
+      el.addEventListener('click',function(e){
+        e.stopPropagation();
+        new maplibregl.Popup({offset:12,closeButton:true,maxWidth:'200px'})
+          .setLngLat([loc.lng,loc.lat])
+          .setHTML('<div style="direction:rtl;font-family:-apple-system,sans-serif;min-width:120px"><b style="color:'+col+';font-size:14px">'+loc.name+'</b><br><span style="font-size:11px;color:#888">'+loc.region+'</span><br><span style="font-size:10px;color:#aaa">'+loc.desc+'</span><button class="popup-nav-btn" onclick="startNavFromMap(\''+loc.name.replace(/'/g,"\\'")+'\')">ملاحة</button></div>')
+          .addTo(glMap);
+      });
+    })(loc,col,marker);
+    locMarkers.push(marker);
   }
 }
 
-function updateMapLeaflet(){
-  if(!mapVisible||!leafletMap) return;
-  addMapMarkers();
-  if(gLat!==null){
-    if(userMarker) leafletMap.removeLayer(userMarker);
-    var userIcon=L.divIcon({
-      className:'',
-      html:'<div style="width:14px;height:14px;background:#5B9BD5;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(91,155,213,.6)" class="loc-pulse"></div>',
-      iconSize:[14,14],iconAnchor:[7,7]
-    });
-    userMarker=L.marker([gLat,gLng],{icon:userIcon,zIndexOffset:1000}).addTo(leafletMap);
-    if(navTarget){
-      if(navLine) leafletMap.removeLayer(navLine);
-      navLine=L.polyline([[gLat,gLng],[navTarget.lat,navTarget.lng]],{
-        color:catColors[navTarget.cat]||'#D4A54A',weight:2,dashArray:'8,6',opacity:.7
-      }).addTo(leafletMap);
-    }
+function updateUserMarker(){
+  if(!glMap||gLat===null) return;
+  if(!userMarkerGL){
+    var el=document.createElement('div');
+    el.innerHTML='<div class="user-dot"></div>';
+    userMarkerGL=new maplibregl.Marker({element:el}).setLngLat([gLng,gLat]).addTo(glMap);
+  }else{
+    userMarkerGL.setLngLat([gLng,gLat]);
   }
+}
+
+function addNavLine(){
+  if(!glMap) return;
+  // remove old source/layer
+  try{if(glMap.getLayer('nav-line-layer')) glMap.removeLayer('nav-line-layer');}catch(e){}
+  try{if(glMap.getSource('nav-line')) glMap.removeSource('nav-line');}catch(e){}
+  if(!navTarget||gLat===null) return;
+  glMap.addSource('nav-line',{
+    type:'geojson',
+    data:{type:'Feature',geometry:{type:'LineString',coordinates:[[gLng,gLat],[navTarget.lng,navTarget.lat]]}}
+  });
+  glMap.addLayer({
+    id:'nav-line-layer',type:'line',source:'nav-line',
+    paint:{'line-color':catColors[navTarget.cat]||'#D4A54A','line-width':2,'line-dasharray':[4,3],'line-opacity':0.7}
+  });
+}
+
+function refreshMapData(){
+  if(!glMap) return;
+  addLocationMarkers();
+  updateUserMarker();
+  addNavLine();
 }
 
 // Layer toggle
 document.getElementById('map-layer-btn').addEventListener('click',function(){
-  tileIdx=(tileIdx+1)%TILES.length;
-  if(currentTileLayer&&leafletMap) leafletMap.removeLayer(currentTileLayer);
-  currentTileLayer=L.tileLayer(TILES[tileIdx].url,{subdomains:'abcd',maxZoom:18}).addTo(leafletMap);
-  var mapEl=document.getElementById('leaflet-map');
-  if(TILES[tileIdx].desert){mapEl.classList.add('desert-theme');}else{mapEl.classList.remove('desert-theme');}
-  addMapMarkers();
-  this.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'+TILES[tileIdx].name;
+  if(!glMap) return;
+  currentStyleIdx=(currentStyleIdx+1)%STYLES.length;
+  var s=STYLES[currentStyleIdx];
+  glMap.setStyle(s.type==='vector'?s.url:makeRasterStyle(s.tiles));
+  // style.load event will re-add markers and apply theme
+  this.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'+s.name;
 });
 
-// Compat wrapper
-function updateMapSVG(){updateMapLeaflet();}
-
-// ===== RENDER LOCATIONS (map only, no list) =====
-function renderLocs(){
-  updateMapLeaflet();
-}
+// Compat wrappers
+function updateMapSVG(){refreshMapData();}
+function renderLocs(){refreshMapData();}
 
 // ========== SERVICE WORKER ==========
 if('serviceWorker' in navigator&&location.protocol==='https:'){
@@ -1166,7 +1166,7 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){
 
 // ========== INIT ==========
 startCam();
-if(mapVisible) setTimeout(initLeafletMap,300);
+if(mapVisible) setTimeout(initMap,300);
 
 })();
 </script>
