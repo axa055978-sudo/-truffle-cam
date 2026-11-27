@@ -167,7 +167,11 @@ nav button .ni svg{width:100%;height:100%}
 .maplibregl-ctrl-attrib{display:none!important}
 .user-dot{width:14px;height:14px;background:#5B9BD5;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(91,155,213,.6);animation:locPulse 2s infinite}
 @keyframes locPulse{0%{box-shadow:0 0 0 0 rgba(91,155,213,.6)}70%{box-shadow:0 0 0 12px rgba(91,155,213,0)}100%{box-shadow:0 0 0 0 rgba(91,155,213,0)}}
-.popup-nav-btn{display:block;margin-top:6px;padding:4px 10px;background:var(--gold);color:#000;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;width:100%;text-align:center}
+.popup-nav-btn{display:block;margin-top:8px;padding:8px 10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;width:100%;text-align:center;letter-spacing:.3px}
+.popup-terrain{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;border:1px solid var(--dim3)}
+.loc-marker{display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}
+.loc-dot{border-radius:50%;border:2px solid rgba(255,255,255,.8);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.loc-name{font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.7);direction:rtl;pointer-events:none}
 
 /* ===== TIPS TAB ===== */
 #t-tips{padding:14px 16px}
@@ -842,42 +846,42 @@ var LOCS=[
   {name:'فيضة العشر',region:'حائل',lat:28.80,lng:42.50,cat:'faydah',desc:'شمال غرب حائل'},
 
   // ===== أودية (17) =====
-  {name:'وادي الرمة',region:'القصيم',lat:26.00,lng:42.00,cat:'wadi',desc:'أطول وادي — 600 كم'},
-  {name:'وادي الباطن',region:'المنطقة الشرقية',lat:28.50,lng:45.50,cat:'wadi',desc:'وادي حفر الباطن'},
-  {name:'وادي حنيفة',region:'الرياض',lat:24.63,lng:46.72,cat:'wadi',desc:'وادي الرياض الرئيسي — 120 كم'},
-  {name:'وادي الدواسر',region:'الرياض',lat:20.49,lng:44.73,cat:'wadi',desc:'جنوب نجد'},
-  {name:'وادي السرحان',region:'الجوف',lat:30.50,lng:38.00,cat:'wadi',desc:'وادي شمالي كبير'},
-  {name:'وادي تثليث',region:'عسير',lat:19.50,lng:44.20,cat:'wadi',desc:'جنوب المملكة'},
-  {name:'وادي بيشة',region:'عسير',lat:20.00,lng:42.60,cat:'wadi',desc:'155 كم في عسير'},
-  {name:'وادي الجرير',region:'القصيم',lat:25.80,lng:43.20,cat:'wadi',desc:'رافد وادي الرمة'},
-  {name:'وادي حبونة',region:'نجران',lat:18.50,lng:44.00,cat:'wadi',desc:'وادي نجران'},
-  {name:'وادي فاطمة',region:'مكة',lat:21.70,lng:39.80,cat:'wadi',desc:'غرب مكة'},
-  {name:'وادي نعام',region:'الرياض',lat:23.50,lng:45.50,cat:'wadi',desc:'جنوب الرياض'},
-  {name:'وادي العقيق',region:'المدينة',lat:24.47,lng:39.60,cat:'wadi',desc:'وادي المدينة'},
-  {name:'وادي المياه',region:'القصيم',lat:26.10,lng:43.00,cat:'wadi',desc:'جنوب القصيم'},
-  {name:'وادي أبو علي',region:'المنطقة الشرقية',lat:27.00,lng:49.00,cat:'wadi',desc:'شرق السعودية'},
-  {name:'وادي لبن',region:'الرياض',lat:24.60,lng:46.58,cat:'wadi',desc:'رافد وادي حنيفة الغربي'},
-  {name:'وادي نمار',region:'الرياض',lat:24.57,lng:46.62,cat:'wadi',desc:'متنزه وسد نمار'},
-  {name:'وادي تربة',region:'مكة',lat:21.20,lng:41.63,cat:'wadi',desc:'شرق الطائف'},
+  {name:'وادي الرمة',region:'القصيم',lat:26.00,lng:42.00,cat:'wadi',desc:'أطول وادي — 600 كم',terrain:'ردمية'},
+  {name:'وادي الباطن',region:'المنطقة الشرقية',lat:28.50,lng:45.50,cat:'wadi',desc:'وادي حفر الباطن',terrain:'ردمية'},
+  {name:'وادي حنيفة',region:'الرياض',lat:24.63,lng:46.72,cat:'wadi',desc:'وادي الرياض الرئيسي — 120 كم',terrain:'زقلة'},
+  {name:'وادي الدواسر',region:'الرياض',lat:20.49,lng:44.73,cat:'wadi',desc:'جنوب نجد',terrain:'ردمية'},
+  {name:'وادي السرحان',region:'الجوف',lat:30.50,lng:38.00,cat:'wadi',desc:'وادي شمالي كبير',terrain:'نفود'},
+  {name:'وادي تثليث',region:'عسير',lat:19.50,lng:44.20,cat:'wadi',desc:'جنوب المملكة',terrain:'زقلة'},
+  {name:'وادي بيشة',region:'عسير',lat:20.00,lng:42.60,cat:'wadi',desc:'155 كم في عسير',terrain:'زقلة'},
+  {name:'وادي الجرير',region:'القصيم',lat:25.80,lng:43.20,cat:'wadi',desc:'رافد وادي الرمة',terrain:'ردمية'},
+  {name:'وادي حبونة',region:'نجران',lat:18.50,lng:44.00,cat:'wadi',desc:'وادي نجران',terrain:'زقلة'},
+  {name:'وادي فاطمة',region:'مكة',lat:21.70,lng:39.80,cat:'wadi',desc:'غرب مكة',terrain:'زقلة'},
+  {name:'وادي نعام',region:'الرياض',lat:23.50,lng:45.50,cat:'wadi',desc:'جنوب الرياض',terrain:'نفود'},
+  {name:'وادي العقيق',region:'المدينة',lat:24.47,lng:39.60,cat:'wadi',desc:'وادي المدينة',terrain:'زقلة'},
+  {name:'وادي المياه',region:'القصيم',lat:26.10,lng:43.00,cat:'wadi',desc:'جنوب القصيم',terrain:'ردمية'},
+  {name:'وادي أبو علي',region:'المنطقة الشرقية',lat:27.00,lng:49.00,cat:'wadi',desc:'شرق السعودية',terrain:'ردمية'},
+  {name:'وادي لبن',region:'الرياض',lat:24.60,lng:46.58,cat:'wadi',desc:'رافد وادي حنيفة الغربي',terrain:'ردمية'},
+  {name:'وادي نمار',region:'الرياض',lat:24.57,lng:46.62,cat:'wadi',desc:'متنزه وسد نمار',terrain:'زقلة'},
+  {name:'وادي تربة',region:'مكة',lat:21.20,lng:41.63,cat:'wadi',desc:'شرق الطائف',terrain:'زقلة'},
 
   // ===== شعبان (17) =====
-  {name:'شعيب الحيسية',region:'الرياض',lat:25.30,lng:46.50,cat:'shaaban',desc:'شرق الرياض'},
-  {name:'شعيب لحا',region:'الرياض',lat:24.65,lng:46.63,cat:'shaaban',desc:'رافد وادي حنيفة'},
-  {name:'شعيب الوقف',region:'القصيم',lat:26.00,lng:43.50,cat:'shaaban',desc:'وسط القصيم'},
-  {name:'شعيب أبو شجرة',region:'حائل',lat:27.60,lng:41.80,cat:'shaaban',desc:'حائل'},
-  {name:'شعيب المريخي',region:'الرياض',lat:24.60,lng:46.60,cat:'shaaban',desc:'وسط الرياض'},
-  {name:'شعيب العمارية',region:'الرياض',lat:24.90,lng:46.40,cat:'shaaban',desc:'شمال الرياض'},
-  {name:'شعيب الشعبة',region:'القصيم',lat:26.30,lng:43.70,cat:'shaaban',desc:'القصيم'},
-  {name:'شعيب الأوسط',region:'حائل',lat:27.40,lng:41.50,cat:'shaaban',desc:'جنوب حائل'},
-  {name:'شعيب وثيلان',region:'الرياض',lat:25.10,lng:46.20,cat:'shaaban',desc:'شرق الرياض'},
-  {name:'شعيب ملهم',region:'الرياض',lat:25.18,lng:46.10,cat:'shaaban',desc:'شمال الرياض'},
-  {name:'شعيب جو',region:'حائل',lat:27.50,lng:41.65,cat:'shaaban',desc:'شعيب مشهور في حائل'},
-  {name:'شعيب المسعودية',region:'الشرقية',lat:25.10,lng:47.25,cat:'shaaban',desc:'شرق الرياض'},
-  {name:'شعيب أبالجد',region:'الرياض',lat:24.55,lng:46.55,cat:'shaaban',desc:'السويدي بالرياض'},
-  {name:'شعيب صفار',region:'الرياض',lat:24.75,lng:46.50,cat:'shaaban',desc:'رافد وادي حنيفة'},
-  {name:'شعيب وبير',region:'الرياض',lat:24.70,lng:46.55,cat:'shaaban',desc:'غرب الرياض'},
-  {name:'شعيب الأيسن',region:'الرياض',lat:24.62,lng:46.75,cat:'shaaban',desc:'شرق وادي حنيفة'},
-  {name:'شعيب الودي',region:'القصيم',lat:26.06,lng:44.47,cat:'shaaban',desc:'شمال القصيم'},
+  {name:'شعيب الحيسية',region:'الرياض',lat:25.30,lng:46.50,cat:'shaaban',desc:'شرق الرياض',terrain:'ردمية'},
+  {name:'شعيب لحا',region:'الرياض',lat:24.65,lng:46.63,cat:'shaaban',desc:'رافد وادي حنيفة',terrain:'ردمية'},
+  {name:'شعيب الوقف',region:'القصيم',lat:26.00,lng:43.50,cat:'shaaban',desc:'وسط القصيم',terrain:'زقلة'},
+  {name:'شعيب أبو شجرة',region:'حائل',lat:27.60,lng:41.80,cat:'shaaban',desc:'حائل',terrain:'نفود'},
+  {name:'شعيب المريخي',region:'الرياض',lat:24.60,lng:46.60,cat:'shaaban',desc:'وسط الرياض',terrain:'ردمية'},
+  {name:'شعيب العمارية',region:'الرياض',lat:24.90,lng:46.40,cat:'shaaban',desc:'شمال الرياض',terrain:'ردمية'},
+  {name:'شعيب الشعبة',region:'القصيم',lat:26.30,lng:43.70,cat:'shaaban',desc:'القصيم',terrain:'زقلة'},
+  {name:'شعيب الأوسط',region:'حائل',lat:27.40,lng:41.50,cat:'shaaban',desc:'جنوب حائل',terrain:'نفود'},
+  {name:'شعيب وثيلان',region:'الرياض',lat:25.10,lng:46.20,cat:'shaaban',desc:'شرق الرياض',terrain:'ردمية'},
+  {name:'شعيب ملهم',region:'الرياض',lat:25.18,lng:46.10,cat:'shaaban',desc:'شمال الرياض',terrain:'زقلة'},
+  {name:'شعيب جو',region:'حائل',lat:27.50,lng:41.65,cat:'shaaban',desc:'شعيب مشهور في حائل',terrain:'نفود'},
+  {name:'شعيب المسعودية',region:'الشرقية',lat:25.10,lng:47.25,cat:'shaaban',desc:'شرق الرياض',terrain:'ردمية'},
+  {name:'شعيب أبالجد',region:'الرياض',lat:24.55,lng:46.55,cat:'shaaban',desc:'السويدي بالرياض',terrain:'ردمية'},
+  {name:'شعيب صفار',region:'الرياض',lat:24.75,lng:46.50,cat:'shaaban',desc:'رافد وادي حنيفة',terrain:'ردمية'},
+  {name:'شعيب وبير',region:'الرياض',lat:24.70,lng:46.55,cat:'shaaban',desc:'غرب الرياض',terrain:'زقلة'},
+  {name:'شعيب الأيسن',region:'الرياض',lat:24.62,lng:46.75,cat:'shaaban',desc:'شرق وادي حنيفة',terrain:'ردمية'},
+  {name:'شعيب الودي',region:'القصيم',lat:26.06,lng:44.47,cat:'shaaban',desc:'شمال القصيم',terrain:'نفود'},
 
   // ===== قلبان — آبار (16) =====
   {name:'قليب الحيد',region:'الرياض',lat:25.60,lng:45.80,cat:'well',desc:'قليب شمال الرياض'},
@@ -1082,6 +1086,9 @@ function applyArabicLabels(){
   }
 }
 
+var terrainColors={'نفود':'#D4A54A','ردمية':'#8A7D6B','زقلة':'#A0522D'};
+var terrainIcons={'نفود':'۩','ردمية':'▪','زقلة':'▲'};
+
 function addLocationMarkers(){
   // remove old markers
   for(var i=0;i<locMarkers.length;i++) locMarkers[i].remove();
@@ -1090,19 +1097,29 @@ function addLocationMarkers(){
     var loc=LOCS[i];
     var col=catColors[loc.cat]||'#888';
     var isNav=navTarget&&navTarget.name===loc.name;
-    // marker element
+    // marker element with name label
     var el=document.createElement('div');
-    var sz=isNav?18:14;
-    el.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+col+';border:2px solid rgba(255,255,255,.8);border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)';
-    if(isNav) el.style.boxShadow='0 0 12px '+col+',0 2px 8px rgba(0,0,0,.4)';
-    var marker=new maplibregl.Marker({element:el}).setLngLat([loc.lng,loc.lat]).addTo(glMap);
-    // click popup
+    el.className='loc-marker';
+    var sz=isNav?16:12;
+    el.innerHTML='<div class="loc-dot" style="width:'+sz+'px;height:'+sz+'px;background:'+col+(isNav?';box-shadow:0 0 12px '+col:'')+'"></div><span class="loc-name" style="color:'+col+'">'+loc.name+'</span>';
+    var marker=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([loc.lng,loc.lat]).addTo(glMap);
+    // click popup with terrain + nav
     (function(loc,col,marker){
       el.addEventListener('click',function(e){
         e.stopPropagation();
-        new maplibregl.Popup({offset:12,closeButton:true,maxWidth:'200px'})
+        var terrainHTML='';
+        if(loc.terrain){
+          var tc=terrainColors[loc.terrain]||'#888';
+          terrainHTML='<div style="margin-top:5px"><span class="popup-terrain" style="background:'+tc+'22;color:'+tc+';border-color:'+tc+'44">'+(terrainIcons[loc.terrain]||'')+' '+loc.terrain+'</span></div>';
+        }
+        var distHTML='';
+        if(gLat!==null){
+          var d=haversine(gLat,gLng,loc.lat,loc.lng);
+          distHTML='<div style="margin-top:5px;font-size:11px;color:var(--gold);font-weight:700">'+formatDist(d)+' منك</div>';
+        }
+        new maplibregl.Popup({offset:15,closeButton:true,maxWidth:'220px'})
           .setLngLat([loc.lng,loc.lat])
-          .setHTML('<div style="direction:rtl;font-family:-apple-system,sans-serif;min-width:120px"><b style="color:'+col+';font-size:14px">'+loc.name+'</b><br><span style="font-size:11px;color:#888">'+loc.region+'</span><br><span style="font-size:10px;color:#aaa">'+loc.desc+'</span><button class="popup-nav-btn" onclick="startNavFromMap(\''+loc.name.replace(/'/g,"\\'")+'\')">ملاحة</button></div>')
+          .setHTML('<div style="direction:rtl;font-family:-apple-system,sans-serif;min-width:130px"><b style="color:'+col+';font-size:15px">'+loc.name+'</b><br><span style="font-size:11px;color:#888">'+loc.region+'</span><br><span style="font-size:10px;color:#aaa">'+loc.desc+'</span>'+terrainHTML+distHTML+'<button class="popup-nav-btn" onclick="startNavFromMap(\''+loc.name.replace(/'/g,"\\'")+'\')">ابدأ الملاحة</button></div>')
           .addTo(glMap);
       });
     })(loc,col,marker);
