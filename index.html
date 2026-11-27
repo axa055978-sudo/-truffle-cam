@@ -116,10 +116,6 @@ nav button .ni svg{width:100%;height:100%}
 /* ===== MAP TAB — GARMIN STYLE ===== */
 #t-map{padding:0;display:flex;flex-direction:column;height:100%}
 
-.map-hdr{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--dim3);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.map-hdr-title{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;color:var(--gold)}
-.map-hdr-gps{font-size:9px;color:var(--dim);font-family:monospace;direction:ltr}
-
 /* Compass & nav panel */
 #nav-panel{background:linear-gradient(180deg,var(--card),var(--card2));border-bottom:1px solid var(--dim3);padding:14px;flex-shrink:0;display:none;position:relative}
 #nav-panel.active{display:block}
@@ -152,9 +148,9 @@ nav button .ni svg{width:100%;height:100%}
 .cf-btn.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border-color:var(--gold);box-shadow:0 2px 8px rgba(212,165,74,.25)}
 
 /* Map View */
-#map-view{position:relative;width:100%;height:55vh;background:var(--card);border-bottom:1px solid var(--dim3);flex-shrink:0;overflow:hidden;display:none}
-#map-view.show{display:block}
-#leaflet-map{width:100%;height:100%;z-index:1}
+#map-view{position:relative;width:100%;flex:1;background:var(--card);overflow:hidden;display:none}
+#map-view.show{display:flex;flex-direction:column}
+#leaflet-map{flex:1;width:100%;z-index:1}
 #leaflet-map .leaflet-control-attribution{display:none}
 #leaflet-map.desert-theme .leaflet-tile-pane{filter:sepia(0.22) saturate(0.78) brightness(1.06) hue-rotate(-8deg);transition:filter .4s}
 #leaflet-map.desert-theme .leaflet-popup-content-wrapper{background:#2A2318!important;border-color:#4A3D2E!important}
@@ -162,16 +158,20 @@ nav button .ni svg{width:100%;height:100%}
 #leaflet-map .leaflet-control-zoom{border:none!important}
 #leaflet-map .leaflet-control-zoom a{background:var(--card2)!important;color:var(--gold)!important;border:1px solid var(--dim3)!important;width:28px!important;height:28px!important;line-height:28px!important;font-size:14px!important;border-radius:8px!important}
 #leaflet-map .leaflet-control-zoom a:first-child{margin-bottom:3px!important;border-radius:8px!important}
-.map-toggle{position:absolute;top:8px;right:8px;background:var(--card2);border:1px solid var(--dim3);color:var(--dim);padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;z-index:1000}
-.map-toggle.on{background:var(--gold);color:#000;border-color:var(--gold)}
-.map-layer-btn{position:absolute;top:8px;left:8px;background:var(--card2);border:1px solid var(--dim3);color:var(--dim);padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;z-index:1000;display:flex;align-items:center;gap:4px}
-.map-layer-btn svg{width:12px;height:12px}
+/* Coordinate Search */
+.coord-search{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;gap:5px;direction:ltr;width:calc(100% - 100px)}
+.coord-search input{flex:1;padding:10px 14px;border-radius:12px;border:1.5px solid var(--dim3);background:rgba(22,19,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-size:16px;font-family:'SF Mono',Menlo,monospace;text-align:center;outline:none;letter-spacing:.5px}
+.coord-search input::placeholder{color:var(--dim2);font-size:13px;font-family:-apple-system,sans-serif;letter-spacing:0}
+.coord-search input:focus{border-color:var(--gold);box-shadow:0 0 12px rgba(212,165,74,.3)}
+.coord-search button{padding:8px 16px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(212,165,74,.3)}
+.map-layer-btn{position:absolute;top:60px;left:8px;background:rgba(22,19,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid var(--dim3);color:var(--dim);padding:7px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;z-index:1000;display:flex;align-items:center;gap:5px}
+.map-layer-btn svg{width:14px;height:14px}
 .map-legend{position:absolute;bottom:8px;left:8px;display:flex;gap:8px;z-index:1000;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:3px;font-size:8px;color:var(--dim);font-weight:600}
 .legend-dot{width:6px;height:6px;border-radius:50%}
 .loc-pulse{border-radius:50%;animation:locPulse 2s infinite}
 @keyframes locPulse{0%{box-shadow:0 0 0 0 rgba(91,155,213,.6)}70%{box-shadow:0 0 0 12px rgba(91,155,213,0)}100%{box-shadow:0 0 0 0 rgba(91,155,213,0)}}
-.map-label{font-size:10px;font-weight:700;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.7),1px 1px 2px rgba(0,0,0,.8);white-space:nowrap;direction:rtl;pointer-events:none}
+.map-label{font-size:18px;font-weight:900;color:#fff;text-shadow:0 0 6px rgba(0,0,0,.98),0 0 12px rgba(0,0,0,.85),1px 1px 4px rgba(0,0,0,.95),2px 2px 6px rgba(0,0,0,.7);white-space:nowrap;direction:rtl;pointer-events:none;letter-spacing:.3px}
 .map-label-truffle{color:#D4A54A}
 .map-label-faydah{color:#8FD46E}
 .map-label-wadi{color:#8FC4E8}
@@ -293,13 +293,8 @@ nav button .ni svg{width:100%;height:100%}
     <div id="hist-box"></div>
   </section>
 
-  <!-- ===== MAP (GARMIN) ===== -->
+  <!-- ===== MAP ===== -->
   <section id="t-map" class="tab-sec">
-    <div class="map-hdr">
-      <div class="map-hdr-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;vertical-align:-2px;margin-left:5px"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><polygon points="12,8 14,13 12,12 10,13" fill="currentColor" stroke="none"/></svg> الملاحة</div>
-      <div class="map-hdr-gps" id="map-gps">بانتظار GPS...</div>
-    </div>
-
     <div id="nav-panel">
       <button class="nav-close" id="nav-close">✕</button>
       <div class="nav-target">
@@ -328,8 +323,11 @@ nav button .ni svg{width:100%;height:100%}
     </div>
 
     <div id="map-view" class="show">
-      <button class="map-toggle on" id="map-toggle">الخريطة</button>
-      <button class="map-layer-btn" id="map-layer-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>طبقة</button>
+      <div class="coord-search" id="coord-search">
+        <input id="coord-input" type="text" inputmode="decimal" placeholder="خط العرض ، خط الطول" dir="ltr">
+        <button id="coord-go">ابحث</button>
+      </div>
+      <button class="map-layer-btn" id="map-layer-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>صحراوية</button>
       <div id="leaflet-map"></div>
       <div class="map-legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>فقع</div>
@@ -339,25 +337,6 @@ nav button .ni svg{width:100%;height:100%}
         <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>قلبان</div>
       </div>
     </div>
-
-    <div style="padding:10px 16px 0">
-      <div class="stat-row">
-        <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-label">المواقع</div></div>
-        <div class="stat-card"><div class="stat-val" id="stat-nearest">—</div><div class="stat-label">أقرب موقع</div></div>
-        <div class="stat-card"><div class="stat-val" id="stat-speed">—</div><div class="stat-label">السرعة</div></div>
-      </div>
-    </div>
-
-    <div class="map-filters" id="cat-filters">
-      <button class="cf-btn on" data-cat="all">الكل</button>
-      <button class="cf-btn" data-cat="truffle"><span class="cf-dot" style="background:var(--gold)"></span>فقع</button>
-      <button class="cf-btn" data-cat="faydah"><span class="cf-dot" style="background:var(--green)"></span>فياض</button>
-      <button class="cf-btn" data-cat="wadi"><span class="cf-dot" style="background:var(--blue)"></span>أودية</button>
-      <button class="cf-btn" data-cat="shaaban"><span class="cf-dot" style="background:var(--cyan)"></span>شعبان</button>
-      <button class="cf-btn" data-cat="well"><span class="cf-dot" style="background:var(--amber)"></span>قلبان</button>
-    </div>
-
-    <div id="loc-box"></div>
   </section>
 
   <!-- ===== TIPS ===== -->
@@ -424,7 +403,7 @@ function switchTab(targetId){
   var sec=document.getElementById(targetId);
   if(sec) sec.classList.add('active');
   if(targetId==='t-hist') renderHist();
-  if(targetId==='t-map'){renderLocs();updateNavPanel();}
+  if(targetId==='t-map'){updateNavPanel();if(leafletMap){setTimeout(function(){leafletMap.invalidateSize();},100);updateMapLeaflet();}else{setTimeout(initLeafletMap,100);}}
 }
 for(var i=0;i<navBtns.length;i++){
   (function(btn){
@@ -442,10 +421,7 @@ if(navigator.geolocation){
     var badge=document.getElementById('gps-badge');
     badge.style.display='inline';
     badge.innerHTML='<svg style="width:12px;height:12px;vertical-align:-1px;margin-left:4px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg> '+gLat.toFixed(4)+', '+gLng.toFixed(4);
-    document.getElementById('map-gps').textContent=gLat.toFixed(5)+', '+gLng.toFixed(5);
-    if(gSpeed!==null&&gSpeed>0){
-      document.getElementById('stat-speed').textContent=(gSpeed*3.6).toFixed(0)+' km/h';
-    }
+    var mapGps=document.getElementById('map-gps');if(mapGps)mapGps.textContent=gLat.toFixed(5)+', '+gLng.toFixed(5);
     updateNavPanel();
     updateMapSVG();
   },function(){
@@ -991,32 +967,34 @@ var LOCS=[
 var activeCat='all';
 var mapVisible=true;
 
-// Category filter buttons
-var catBtns=document.querySelectorAll('.cf-btn');
-for(var i=0;i<catBtns.length;i++){
-  (function(btn){
-    var handler=function(e){
-      e.preventDefault();
-      for(var j=0;j<catBtns.length;j++) catBtns[j].classList.remove('on');
-      btn.classList.add('on');activeCat=btn.getAttribute('data-cat');
-      renderLocs();updateMapSVG();
-    };
-    btn.addEventListener('touchstart',handler,{passive:false});
-    btn.addEventListener('click',handler);
-  })(catBtns[i]);
+// Coordinate search
+var coordSearchMarker=null;
+document.getElementById('coord-go').addEventListener('click',function(){doCoordSearch();});
+document.getElementById('coord-input').addEventListener('keydown',function(e){if(e.key==='Enter')doCoordSearch();});
+function doCoordSearch(){
+  var val=document.getElementById('coord-input').value.trim();
+  if(!val)return;
+  var parts=val.replace(/[،؛]/g,',').split(',');
+  if(parts.length<2){parts=val.split(/\s+/);}
+  if(parts.length<2){showMsg('أدخل الإحداثيات: خط العرض ، خط الطول');return;}
+  var lat=parseFloat(parts[0].trim());
+  var lng=parseFloat(parts[1].trim());
+  if(isNaN(lat)||isNaN(lng)||lat<-90||lat>90||lng<-180||lng>180){showMsg('إحداثيات غير صحيحة');return;}
+  if(!leafletMap){showMsg('الخريطة لم تتحمل بعد');return;}
+  leafletMap.flyTo([lat,lng],14,{duration:1.5});
+  if(coordSearchMarker){leafletMap.removeLayer(coordSearchMarker);}
+  coordSearchMarker=L.marker([lat,lng],{
+    icon:L.divIcon({
+      className:'',
+      html:'<div style="width:20px;height:20px;background:var(--red);border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px rgba(212,96,60,.7)"></div>',
+      iconSize:[20,20],iconAnchor:[10,10]
+    }),
+    zIndexOffset:2000
+  }).addTo(leafletMap);
+  coordSearchMarker.bindPopup('<div style="direction:rtl;font-family:-apple-system,sans-serif;text-align:center"><b style="font-size:13px;color:var(--gold)">📍 '+lat.toFixed(5)+', '+lng.toFixed(5)+'</b></div>').openPopup();
+  showMsg('تم الانتقال للإحداثيات');
+  document.getElementById('coord-input').blur();
 }
-
-// Map toggle
-document.getElementById('map-toggle').addEventListener('click',function(){
-  mapVisible=!mapVisible;
-  var mv=document.getElementById('map-view');
-  var tb=document.getElementById('map-toggle');
-  if(mapVisible){
-    mv.classList.add('show');tb.classList.add('on');
-    if(!leafletMap) setTimeout(initLeafletMap,100);
-    else{setTimeout(function(){leafletMap.invalidateSize();},100);updateMapLeaflet();}
-  } else{mv.classList.remove('show');tb.classList.remove('on');}
-});
 
 // Nav close
 document.getElementById('nav-close').addEventListener('click',function(){
@@ -1121,9 +1099,9 @@ function addMapMarkers(){
     var loc=LOCS[i];
     var col=isDesert?(catColorsDesert[loc.cat]||'#5C4020'):(catColors[loc.cat]||'#888');
     var isNav=navTarget&&navTarget.name===loc.name;
-    var r=isNav?8:6;
+    var r=isNav?10:8;
     var marker=L.circleMarker([loc.lat,loc.lng],{
-      radius:r,fillColor:col,color:isDesert?'#3A2A15':'#000',weight:isDesert?2:1.5,fillOpacity:.9
+      radius:r,fillColor:col,color:isDesert?'#3A2A15':'#000',weight:isDesert?2.5:2,fillOpacity:.95
     }).addTo(leafletMap);
     marker.bindPopup('<div style="direction:rtl;font-family:-apple-system,sans-serif;min-width:130px"><b style="color:'+col+';font-size:14px">'+loc.name+'</b><br><span style="font-size:11px;color:#888">'+loc.region+'</span><br><span style="font-size:10px;color:#aaa">'+loc.desc+'</span><button class="popup-nav-btn" onclick="startNavFromMap(\''+loc.name.replace(/'/g,"\\'")+'\')">ملاحة</button></div>');
     marker.locData=loc;
@@ -1175,60 +1153,9 @@ document.getElementById('map-layer-btn').addEventListener('click',function(){
 // Compat wrapper
 function updateMapSVG(){updateMapLeaflet();}
 
-// ===== RENDER LOCATIONS =====
+// ===== RENDER LOCATIONS (map only, no list) =====
 function renderLocs(){
-  var box=document.getElementById('loc-box');
-  var locs=[];
-  for(var i=0;i<LOCS.length;i++){
-    if(activeCat==='all'||LOCS[i].cat===activeCat) locs.push(LOCS[i]);
-  }
-  document.getElementById('stat-total').textContent=locs.length;
-
-  if(gLat!==null){
-    for(var i=0;i<locs.length;i++){
-      locs[i]=JSON.parse(JSON.stringify(locs[i]));
-      locs[i].dist=haversine(gLat,gLng,locs[i].lat,locs[i].lng);
-      locs[i].brng=bearing(gLat,gLng,locs[i].lat,locs[i].lng);
-    }
-    locs.sort(function(a,b){return a.dist-b.dist;});
-    if(locs.length>0) document.getElementById('stat-nearest').textContent=formatDist(locs[0].dist);
-  }
-
-  var catIcons={truffle:'type-truffle',wadi:'type-wadi',faydah:'type-faydah',shaaban:'type-shaaban',well:'type-well'};
-  var catEmoji={truffle:'ف',wadi:'و',faydah:'ر',shaaban:'ش',well:'ق'};
-
-  var html='';
-  for(var i=0;i<locs.length;i++){
-    var l=locs[i];
-    var distTxt=l.dist!==undefined?formatDist(l.dist):'';
-    var brngTxt=l.brng!==undefined?bearingLabel(l.brng)+' '+Math.round(l.brng)+'°':'';
-    var isNav=navTarget&&navTarget.name===l.name;
-    html+='<div class="lc'+(isNav?' navigating':'')+'" data-lat="'+l.lat+'" data-lng="'+l.lng+'" data-name="'+l.name+'">';
-    html+='<div class="lc-icon '+catIcons[l.cat]+'">'+catEmoji[l.cat]+'</div>';
-    html+='<div class="lc-body"><div class="lc-name">'+l.name+'</div><div class="lc-region">'+l.region+' — '+l.desc+'</div></div>';
-    html+='<div class="lc-right">';
-    if(distTxt) html+='<div class="lc-dist">'+distTxt+'</div>';
-    if(brngTxt) html+='<div class="lc-bearing">'+brngTxt+'</div>';
-    html+='</div><button class="lc-nav-btn" data-idx="'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>';
-  }
-  box.innerHTML=html;
-
-  var lcCards=box.querySelectorAll('.lc');
-  for(var ci=0;ci<lcCards.length;ci++){
-    (function(card,idx){
-      var navBtn=card.querySelector('.lc-nav-btn');
-      if(navBtn){
-        var navHandler=function(e){e.preventDefault();e.stopPropagation();startNav(locs[idx]);};
-        navBtn.addEventListener('touchstart',navHandler,{passive:false});
-        navBtn.addEventListener('click',navHandler);
-      }
-      card.addEventListener('click',function(e){
-        if(e.target.classList.contains('lc-nav-btn'))return;
-        var lat=card.getAttribute('data-lat');var lng=card.getAttribute('data-lng');var name=card.getAttribute('data-name');
-        window.location.href='https://maps.apple.com/?ll='+lat+','+lng+'&q='+encodeURIComponent(name)+'&z=10';
-      });
-    })(lcCards[ci],ci);
-  }
+  updateMapLeaflet();
 }
 
 // ========== SERVICE WORKER ==========
@@ -1239,7 +1166,6 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){
 
 // ========== INIT ==========
 startCam();
-renderLocs();
 if(mapVisible) setTimeout(initLeafletMap,300);
 
 })();
